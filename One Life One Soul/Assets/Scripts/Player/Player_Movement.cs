@@ -77,9 +77,9 @@ public class Player_Movement : MonoBehaviour
             m_Grounded = true;
             mayJump = coyoteTimeForgiveness;
 
+            // This is to reset the player's vertical velocity to prevent falling through the floor at high speeds
             if (!softLand)
             {
-                // reset Vertical velocity to prevent falling through the floor slightly?
                 Vector3 tmpVel = playerScript.rb.velocity;
                 tmpVel.y = 0.0f;
                 playerScript.rb.velocity = tmpVel;
@@ -99,24 +99,24 @@ public class Player_Movement : MonoBehaviour
 
     public void Move(Vector3 move, bool jump)
     {
-        // Move the character by finding the target velocity
-        // And then smoothing it out and applying it to the character
+        // Smoothly move the character to the target velocity after first adjusting the velocity to the players corect orientation
         Vector3 targetVelocity = new Vector3(move.x * movementSpeed * Time.fixedDeltaTime, playerScript.rb.velocity.y, move.y * movementSpeed * Time.fixedDeltaTime);
-        playerScript.rb.velocity = Vector3.SmoothDamp(playerScript.rb.velocity, targetVelocity, ref velocity, m_MovementSmoothing);
+        Vector3 translatedVelocity = playerScript.transform.TransformDirection(targetVelocity);
+        playerScript.rb.velocity = Vector3.SmoothDamp(playerScript.rb.velocity, translatedVelocity, ref velocity, m_MovementSmoothing);
 
-
+        // InverseTransformDirection converts the Velocity of the Player from World to Local to Adjust when the Camera Moves
         // If the player is moving to the right and the player is currently facing left...
-        if (playerScript.rb.velocity.x > 0 && !m_FacingRight)
+        if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x > 0 && !m_FacingRight)
         {
             Flip();
         }
         // Otherwise if the player is moving to the left and the player is currently facing right...
-        else if (playerScript.rb.velocity.x < 0 && m_FacingRight)
+        else if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x < 0 && m_FacingRight)
         {
             Flip();
         }
 
-        // If the player should jump while on the ground or during the coyoteTimeForgiveness period, the Player Jumps
+        // If the player should try to jump while on the ground or during the coyoteTimeForgiveness period, the Player Jumps
         if ((m_Grounded || mayJump > 0.0f) && jump)
         {
             m_Grounded = false;

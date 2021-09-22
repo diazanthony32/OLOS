@@ -67,7 +67,7 @@ public class Player_Movement : MonoBehaviour
 
     // Fixed Update is called once per Physics Update
     void FixedUpdate()
-    { 
+    {
         m_Grounded = false;
 
         // Checking the player's ground Check to see if the player is currently grounded
@@ -81,7 +81,7 @@ public class Player_Movement : MonoBehaviour
             if (!softLand)
             {
                 Vector3 tmpVel = playerScript.rb.velocity;
-                tmpVel.y = 0.0f;
+                tmpVel.y = -1.0f;
                 playerScript.rb.velocity = tmpVel;
                 softLand = true;
             }
@@ -173,7 +173,12 @@ public class Player_Movement : MonoBehaviour
     {
         // Switch the way the player is labelled as facing.
         m_FacingRight = !m_FacingRight;
-        playerScript.sr.flipX = !m_FacingRight;
+        //playerScript.sr.flipX = !m_FacingRight;
+
+        foreach (SpriteRenderer sprite in playerScript.spriteRenderers)
+        {
+            sprite.flipX = !m_FacingRight;
+        }
 
         //// Multiply the player's x local scale by -1.
         //Vector3 theScale = transform.localScale;

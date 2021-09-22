@@ -20,14 +20,19 @@ public class Player : MonoBehaviour
 
     [Header("Player Attributes")]
     [Space(5)]
-    [SerializeField] internal HealthState healthState = HealthState.Full;
+    [SerializeField] internal SplitState splitState = SplitState.Full;
     [SerializeField] internal PlayerState playerState = PlayerState.Idle;
 
+    [Header("Body Sprites")]
+    [Space(5)]
+    [SerializeField] internal SpriteRenderer[] spriteRenderers;
 
     //component references
     internal Animator anim;
     internal Rigidbody rb;
     internal SpriteRenderer sr;
+
+    internal bool activePlayer = true;
 
     private void Awake()
     {
@@ -42,7 +47,7 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        playerCam = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera as CinemachineVirtualCamera;
     }
 
     // Update is called once per frame
@@ -79,12 +84,27 @@ public class Player : MonoBehaviour
         //ChangeSpriteRotation();
     }
 
-    public enum HealthState
+    /*
+
+    Player Conditions:
+    (4) Whole
+    (3) Three Fourths - Either missing TL, TR, BL, BR
+    (2) Half - Either LH, RH, TH, BH
+    (1) One Fourth - TL, TR, BL, BR
+
+    And Theoretically any Combination of that (EX. Having TL and BR, but not the others)
+
+    Problem: WAY to many sprite Variations to properly Handle
+    Solution: Two Sprites, The Dead Sprite always being there underneath, and having the other Sprites be in a List or Array
+     
+    */
+
+    public enum SplitState
     {
-        Dead,
+        None,
         Quarter,
         Half,
-        TwoThirds,
+        ThreeFourths,
         Full
     }
 
@@ -95,6 +115,7 @@ public class Player : MonoBehaviour
         Hurt,
         Dead,
         Jumping,
+        Falling,
         Burning
     }
 }

@@ -607,7 +607,7 @@ MonoBehaviour:
   movementScript: {fileID: 400246539942230162}
   collisionScript: {fileID: 400246539942230163}
   playerCam: {fileID: 0}
-  rotationCooldown: 0.1
+  rotationCooldown: 0.25
   rotationDegrees: 90
   splitState: 4
   playerState: 0

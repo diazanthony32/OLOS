@@ -24,9 +24,9 @@ public class Player_Movement : MonoBehaviour
     [SerializeField]
     private float m_MovementSmoothing = .05f;
 
-    // Whether or not a player can steer while jumping;
+    // How sensitive player sprite fliping is handled, the higher the less sensitive
     [SerializeField]
-    internal bool m_AirControl = false;
+    private float flipDeadzone = 0.1f;
 
     // A mask determining what is ground to the character
     [SerializeField]
@@ -106,12 +106,12 @@ public class Player_Movement : MonoBehaviour
 
         // InverseTransformDirection converts the Velocity of the Player from World to Local to Adjust when the Camera Moves
         // If the player is moving to the right and the player is currently facing left...
-        if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x > 0 && !m_FacingRight)
+        if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x > flipDeadzone && !m_FacingRight)
         {
             Flip();
         }
         // Otherwise if the player is moving to the left and the player is currently facing right...
-        else if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x < 0 && m_FacingRight)
+        else if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x < -flipDeadzone && m_FacingRight)
         {
             Flip();
         }
@@ -180,10 +180,6 @@ public class Player_Movement : MonoBehaviour
             sprite.flipX = !m_FacingRight;
         }
 
-        //// Multiply the player's x local scale by -1.
-        //Vector3 theScale = transform.localScale;
-        //theScale.x *= -1;
-        //transform.localScale = theScale;
     }
 
     void OnDrawGizmosSelected()

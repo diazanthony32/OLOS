@@ -61,6 +61,9 @@ public class Player : MonoBehaviour
 
         // Used for Coyote Time 
         mayRotate -= Time.deltaTime;
+
+        // Used to rotate the player sprites when the player is no longer in control
+        OnCameraUpdate();
     }
 
     void RotateCam()
@@ -76,12 +79,21 @@ public class Player : MonoBehaviour
             tempRot.y -= rotationDegrees;
         }
 
-        //playerCam.transform.eulerAngles = tempRot;
-        LeanTween.rotate(playerCam.gameObject, tempRot, rotationCooldown);
+        // To check out the different easing types, go to: https://easings.net/
+        LeanTween.rotate(playerCam.gameObject, tempRot, rotationCooldown).setEaseInOutSine();
+        tempRot.x = 0.0f; // this tos to offset the camera pointing down angle
+        LeanTween.rotate(this.gameObject, tempRot, rotationCooldown).setEaseInOutSine();
+    }
 
-        tempRot.x = 0.0f;
-        LeanTween.rotate(this.gameObject, tempRot, rotationCooldown);
-        //ChangeSpriteRotation();
+    void OnCameraUpdate()
+    {
+        if (this.transform.eulerAngles.y != playerCam.gameObject.transform.eulerAngles.y && !activePlayer)
+        {
+            Debug.Log("Player Rotation is not aligned to the camera");
+            Vector3 tempRot = this.transform.eulerAngles;
+            tempRot.y = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.transform.eulerAngles.y;
+            this.transform.eulerAngles = tempRot;
+        }
     }
 
     /*

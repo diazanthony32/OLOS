@@ -42,6 +42,12 @@ public class Player : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         rb = GetComponentInChildren<Rigidbody>();
         sr = GetComponentInChildren<SpriteRenderer>();
+
+        foreach (Renderer renderer in spriteRenderers)
+        {
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            renderer.receiveShadows = true;
+        }
     }
 
     // Start is called before the first frame update

@@ -18,7 +18,7 @@ public class Player_Split : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Not enough life to Split...");
+                Debug.LogWarning("Not enough life to Split...");
             }
 
             playerScript.inputScript.split = Player.SplitState.None;
@@ -51,6 +51,7 @@ public class Player_Split : MonoBehaviour
             sprite.enabled = false;
         }
         newPlayer.spriteRenderers[0].enabled = true;
+        newPlayer.spriteRenderers[1].enabled = true;
         newPlayer.splitState = splitHealth;
 
         return newPlayer;
@@ -60,9 +61,9 @@ public class Player_Split : MonoBehaviour
     {
         // this will give us the list of sprites that are currently active on the player;
         List<int> enabledSprites = new List<int>();
-        for (int i = player.spriteRenderers.Length - 1; i > 0; i--)
+        for (int i = player.spriteRenderers.Length - 1; i > 1; i--)
         {
-            //Debug.Log(i);
+            Debug.Log(i);
             if (player.spriteRenderers[i].enabled)
             {
                 enabledSprites.Add(i);

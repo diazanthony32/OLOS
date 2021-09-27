@@ -14,9 +14,9 @@ public class Player_Input : MonoBehaviour
     internal bool rotateCamClockwise;
     internal bool rotateCamCounterClockwise;
 
-    internal bool bodyMorph;
-
     internal Player.SplitState split;
+
+    internal bool combine;
 
     // Start is called before the first frame update
     void Start()
@@ -64,6 +64,17 @@ public class Player_Input : MonoBehaviour
             {
                 split = Player.SplitState.None;
             }
+
+            // Combine
+            combine = Input.GetKeyDown(KeyCode.C);
+        }
+        else {
+            split = Player.SplitState.None;
+            moveInput = Vector3.zero;
+            combine = false;
+            jumping = false;
+            rotateCamClockwise = false;
+            rotateCamCounterClockwise = false;
         }
     }
 }

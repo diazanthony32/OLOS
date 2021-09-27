@@ -458,7 +458,7 @@ GameObject:
   - component: {fileID: 400246541002886651}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -521,6 +521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d2e5200bd64a4fe79fd2dd383403951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManager: {fileID: 0}
   inputScript: {fileID: 400246539942230165}
   movementScript: {fileID: 400246539942230162}
   collisionScript: {fileID: 400246539942230163}
@@ -599,6 +600,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 400246539942230164}
+  combineDetectionRadius: 1.75
 --- !u!1 &400246540845576321
 GameObject:
   m_ObjectHideFlags: 0

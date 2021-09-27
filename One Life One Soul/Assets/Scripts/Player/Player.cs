@@ -5,6 +5,10 @@ using Cinemachine;
 
 public class Player : MonoBehaviour
 {
+    [Header("Game Manager")]
+    [Space(5)]
+    [SerializeField] internal GameManager gameManager;
+
     [Header("Player Scripts")]
     [Space(5)]
     //Store a reference to all the sub player scripts
@@ -54,6 +58,8 @@ public class Player : MonoBehaviour
     void Start()
     {
         playerCam = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera as CinemachineVirtualCamera;
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        gameManager.playerlist.Add(this);
     }
 
     // Update is called once per frame
@@ -70,6 +76,26 @@ public class Player : MonoBehaviour
 
         // Used to rotate the player sprites when the player is no longer in control
         OnCameraUpdate();
+
+    }
+
+    public void Die()
+    {
+        Debug.Log("b4: " + gameManager.playerlist.Count);
+
+        activePlayer = false;
+        gameManager.playerlist.Remove(this);
+
+        Debug.Log("afr: " + gameManager.playerlist.Count);
+
+
+        if (gameManager.playerlist.Count > 0)
+        {
+            playerCam.Follow = gameManager.playerlist[gameManager.playerlist.Count-1].transform;
+            gameManager.playerlist[gameManager.playerlist.Count - 1].activePlayer = true;
+        }
+
+        Destroy(this.gameObject);
     }
 
     void RotateCam()

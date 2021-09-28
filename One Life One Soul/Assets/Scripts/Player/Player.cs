@@ -34,7 +34,6 @@ public class Player : MonoBehaviour
     //component references
     internal Animator anim;
     internal Rigidbody rb;
-    internal SpriteRenderer sr;
 
     internal bool activePlayer = true;
 
@@ -45,7 +44,6 @@ public class Player : MonoBehaviour
         print("Main Player Script Awake");
         anim = GetComponentInChildren<Animator>();
         rb = GetComponentInChildren<Rigidbody>();
-        sr = GetComponentInChildren<SpriteRenderer>();
 
         foreach (Renderer renderer in spriteRenderers)
         {
@@ -77,6 +75,19 @@ public class Player : MonoBehaviour
         // Used to rotate the player sprites when the player is no longer in control
         OnCameraUpdate();
 
+    }
+
+    internal void ChangeState(PlayerState newState)
+    {
+        if (newState != playerState)
+        {
+            Debug.Log("Triggering: \"" + newState + "\" Animation!");
+
+            //anim.ResetTrigger(currentState);
+            anim.SetTrigger(newState.ToString());
+
+            playerState = newState;
+        }
     }
 
     public void Die()

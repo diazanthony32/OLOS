@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -104,11 +105,15 @@ public class Player_Movement : MonoBehaviour
         Vector3 translatedVelocity = playerScript.transform.TransformDirection(targetVelocity);
         playerScript.rb.velocity = Vector3.SmoothDamp(playerScript.rb.velocity, translatedVelocity, ref velocity, m_MovementSmoothing);
 
+        // If there is movement, it will swap to the walking animation
+        playerScript.anim.SetFloat("Walking", Math.Abs(move.x) + Math.Abs(move.y));
+
         // InverseTransformDirection converts the Velocity of the Player from World to Local to Adjust when the Camera Moves
         // If the player is moving to the right and the player is currently facing left...
         if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x > flipDeadzone && !m_FacingRight)
         {
             Flip();
+            playerScript.ChangeState(Player.PlayerState.Walking);
         }
         // Otherwise if the player is moving to the left and the player is currently facing right...
         else if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x < -flipDeadzone && m_FacingRight)
@@ -164,7 +169,7 @@ public class Player_Movement : MonoBehaviour
         if (playerScript.rb.velocity == Vector3.zero)
         {
             //Debug.Log("Player is idle");
-            //playerScript.ChangeState("Idle");
+            //playerScript.ChangeState(Player.PlayerState.Idle);
         }
 
     }

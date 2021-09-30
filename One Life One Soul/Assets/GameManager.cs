@@ -6,6 +6,11 @@ public class GameManager : MonoBehaviour
 {
     public List<Player> playerlist = new List<Player>();
 
+    private void Awake()
+    {
+        //Cursor.lockState = CursorLockMode.Locked;
+    }
+
     // Start is called before the first frame update
     void Start()
     {

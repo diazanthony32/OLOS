@@ -35,12 +35,10 @@ public class Player : MonoBehaviour
     internal Animator anim;
     internal Rigidbody rb;
 
-    internal bool activePlayer = true;
+    [SerializeField] internal bool activePlayer = false;
 
     private void Awake()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-
         print("Main Player Script Awake");
         anim = GetComponentInChildren<Animator>();
         rb = GetComponentInChildren<Rigidbody>();

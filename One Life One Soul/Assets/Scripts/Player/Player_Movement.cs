@@ -113,7 +113,6 @@ public class Player_Movement : MonoBehaviour
         if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x > flipDeadzone && !m_FacingRight)
         {
             Flip();
-            playerScript.ChangeState(Player.PlayerState.Walking);
         }
         // Otherwise if the player is moving to the left and the player is currently facing right...
         else if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x < -flipDeadzone && m_FacingRight)
@@ -133,8 +132,6 @@ public class Player_Movement : MonoBehaviour
             playerScript.rb.velocity = tempVelocity;
 
             softLand = false;
-
-            //playerScript.ChangeState("Jumping");
         }
 
         // Player holds Jump For the entire duration of the Jump
@@ -180,10 +177,15 @@ public class Player_Movement : MonoBehaviour
         m_FacingRight = !m_FacingRight;
         //playerScript.sr.flipX = !m_FacingRight;
 
-        foreach (SpriteRenderer sprite in playerScript.spriteRenderers)
-        {
-            sprite.flipX = !m_FacingRight;
-        }
+        //foreach (SpriteRenderer sprite in playerScript.spriteRenderers)
+        //{
+        //    sprite.flipX = !m_FacingRight;
+        //}
+
+        // Multiply the player's x local scale by -1.
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
 
     }
 

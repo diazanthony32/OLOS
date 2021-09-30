@@ -14,11 +14,18 @@ public class Player_Split : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // If the player selected a split option
         if (playerScript.inputScript.split != Player.SplitState.None)
         {
             if (playerScript.splitState > playerScript.inputScript.split)
             {
-                SplitPlayer(playerScript.inputScript.split);
+                // sets current player to inactive and disables player control
+                this.playerScript.activePlayer = false;
+
+                Player newPlayer = SplitPlayer(this.playerScript.inputScript.split);
+
+                // set the idle player active after everything is handled
+                newPlayer.activePlayer = true;
             }
             else
             {
@@ -27,82 +34,33 @@ public class Player_Split : MonoBehaviour
 
             playerScript.inputScript.split = Player.SplitState.None;
         }
-        else if (playerScript.inputScript.combine)
+
+        // If the player wants to combine
+        else if (playerScript.inputScript.combine != false)
         {
-            CombinePlayer();
-        }
-    }
+            playerScript.inputScript.combine = false;
 
-    void SplitPlayer(Player.SplitState splitHealth)
-    {
-        // Creates the new player with the given health value
-        Player newPlayer = SpawnNewPlayer(splitHealth);
+            // Grabs the nearest idle player
+            Player idlePlayer = GetNearestPlayerBody();
 
-        // Updates the Current Player's Health State
-        playerScript.splitState -= splitHealth;
-
-        // Disable active sprites from the current player to activate on the new player according to the health value
-        SetPlayerSprites(playerScript, newPlayer);
-
-        // swaps camera and disable player control
-        playerScript.playerCam.Follow = newPlayer.transform;
-        playerScript.activePlayer = false;
-
-    }
-
-    void CombinePlayer()
-    {
-        Player idlePlayer = GetNearestPlayerBody();
-
-        if (idlePlayer != null)
-        {
-            CombinePlayerSprites(playerScript,idlePlayer);
-        }
-        else
-        {
-            Debug.LogWarning("No Nearby Bodies to Combine...");
-        }
-
-    }
-
-    void CombinePlayerSprites(Player player, Player idlePlayer)
-    {
-        // adds the health to the idle player and removes it from the active one
-        idlePlayer.splitState += ((int)playerScript.splitState);
-        playerScript.splitState = Player.SplitState.None;
-
-        // swaps active player states and moves the Camera to the idle player
-        playerScript.activePlayer = false;
-        player.playerCam.Follow = idlePlayer.transform;
-        idlePlayer.activePlayer = true;
-
-        // Adds the active Sprites on the active player to the idle one
-        List<int> enabledSprites = GetActiveSpriteList(player);
-        for (int y = 0; y < enabledSprites.Count; y++)
-        {
-            player.spriteRenderers[enabledSprites[y]].enabled = false;
-            idlePlayer.spriteRenderers[enabledSprites[y]].enabled = true;
-        }
-
-        // Removes the old Active Player
-        player.gameManager.playerlist.Remove(playerScript);
-        Destroy(playerScript.gameObject);
-    }
-
-    Player GetNearestPlayerBody()
-    {
-        // Grabbing the nearest idle player body 
-        Collider[] hitColliders = Physics.OverlapSphere(playerScript.transform.position, combineDetectionRadius);
-        foreach (Collider collider in hitColliders)
-        {
-            if (collider.CompareTag("Player") && (collider.transform != playerScript.transform))
+            if (idlePlayer != null)
             {
-                return collider.GetComponent<Player>();
+                // sets current player to inactive and disables player control
+                this.playerScript.activePlayer = false;
+
+                CombinePlayers(this.playerScript, idlePlayer);
+
+                // set the idle player active after everything is handled
+                idlePlayer.activePlayer = true;
+            }
+            else
+            {
+                Debug.LogWarning("No Nearby Bodies to Combine...");
             }
         }
-
-        return null;
     }
+
+// GENERAL FUNCTIONS ---------------------------------------------------------------------------------------------------
 
     // this will give us the list of sprites that are currently active on the player;
     List<int> GetActiveSpriteList(Player player)
@@ -120,13 +78,34 @@ public class Player_Split : MonoBehaviour
         return enabledSprites;
     }
 
+// SPLITTING PLAYER ---------------------------------------------------------------------------------------------------
+
+    Player SplitPlayer(Player.SplitState splitHealth)
+    {
+        this.playerScript.tag = "Shadow";
+
+        // Creates the new player with the given health value
+        Player newPlayer = SpawnNewPlayer(splitHealth);
+
+        // Updates the Current Player's Health State
+        this.playerScript.splitState -= splitHealth;
+
+        // Disable active sprites from the current player to activate on the new player according to the health value
+        SplitPlayerSprites(this.playerScript, newPlayer);
+
+        this.playerScript.playerCam.Follow = newPlayer.transform;
+
+        return newPlayer;
+    }
+
     Player SpawnNewPlayer(Player.SplitState splitHealth)
     {
-        // creation of the new player and setting its state to the split value and getting priority
-        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, playerScript.transform.position, playerScript.transform.rotation, null).GetComponent<Player>();
+        // creation of the new player and setting its splitState to the split value
+        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, this.playerScript.transform.position, this.playerScript.transform.rotation, null).GetComponent<Player>();
         var temp = newPlayer.transform.position;
         temp.z -= 2.0f;
         newPlayer.transform.position = temp;
+        newPlayer.gameObject.name = newPlayer.gameObject.name + " " + (this.playerScript.gameManager.playerlist.Count + 1);
 
         foreach (SpriteRenderer sprite in newPlayer.spriteRenderers)
         {
@@ -139,7 +118,7 @@ public class Player_Split : MonoBehaviour
         return newPlayer;
     }
 
-    void SetPlayerSprites(Player player, Player newPlayer)
+    void SplitPlayerSprites(Player player, Player newPlayer)
     {
         List<int> enabledSprites = GetActiveSpriteList(player);
 
@@ -153,4 +132,52 @@ public class Player_Split : MonoBehaviour
             }
         }
     }
+
+// COMBINING PLAYERS  ---------------------------------------------------------------------------------------------------
+
+    Player GetNearestPlayerBody()
+    {
+        // Grabbing the nearest idle player body 
+        Collider[] hitColliders = Physics.OverlapSphere(this.playerScript.transform.position, combineDetectionRadius);
+        foreach (Collider collider in hitColliders)
+        {
+            if (collider.CompareTag("Shadow") && (collider.transform != this.playerScript.transform))
+            {
+                return collider.GetComponent<Player>();
+            }
+        }
+
+        return null;
+    }
+
+    void CombinePlayers(Player player, Player idlePlayer)
+    {
+        // adds the health to the idle player and removes it from the active one
+        idlePlayer.splitState += ((int)player.splitState);
+        player.splitState = Player.SplitState.None;
+
+        CombinePlayerSprites(player, idlePlayer);
+
+        player.playerCam.Follow = idlePlayer.transform;
+
+        //Removes the old Active Player
+        player.gameManager.playerlist.Remove(player);
+        Destroy(player.gameObject);
+
+        idlePlayer.tag = "Player";
+    }
+
+    void CombinePlayerSprites(Player player, Player idlePlayer)
+    {
+        // Adds the active Sprites on the active player to the idle one
+        List<int> enabledSprites = GetActiveSpriteList(player);
+        for (int y = 0; y < enabledSprites.Count; y++)
+        {
+            player.spriteRenderers[enabledSprites[y]].enabled = false;
+            idlePlayer.spriteRenderers[enabledSprites[y]].enabled = true;
+        }
+    }
+
+// ----------------------------------------------------------------------------------------------------------------------
+
 }

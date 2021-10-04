@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     [SerializeField] internal Player_Input inputScript;
     [SerializeField] internal Player_Movement movementScript;
     [SerializeField] internal Player_Collision collisionScript;
+    [SerializeField] internal Player_Split splitScript;
 
     [Space(5)]
     [SerializeField] internal CinemachineVirtualCamera playerCam;
@@ -100,7 +101,7 @@ public class Player : MonoBehaviour
 
         if (gameManager.playerlist.Count > 0)
         {
-            playerCam.Follow = gameManager.playerlist[gameManager.playerlist.Count-1].transform;
+            playerCam.Follow = gameManager.playerlist[gameManager.playerlist.Count - 1].transform;
             gameManager.playerlist[gameManager.playerlist.Count - 1].activePlayer = true;
         }
 

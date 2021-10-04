@@ -24,13 +24,13 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void RotateTileMaps(int dir)
@@ -38,10 +38,11 @@ public class GameManager : MonoBehaviour
         index += dir;
         Debug.Log(index);
 
-        if (index < 0) {
+        if (index < 0)
+        {
             index = (rotationOrientations.Count - 1);
         }
-        else if (index > rotationOrientations.Count-1)
+        else if (index > rotationOrientations.Count - 1)
         {
             index = 0;
         }
@@ -50,7 +51,7 @@ public class GameManager : MonoBehaviour
 
         foreach (Tilemap tileMap in tileMaps)
         {
-            SetTileMapOrientation(tileMap,rotationOrientations[index]);
+            SetTileMapOrientation(tileMap, rotationOrientations[index]);
         }
     }
 

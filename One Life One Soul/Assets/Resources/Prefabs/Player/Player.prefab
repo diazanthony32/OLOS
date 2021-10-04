@@ -154,7 +154,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: a281290c9f47542de8ff7e69f47224c6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.88235295}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -525,6 +525,7 @@ MonoBehaviour:
   inputScript: {fileID: 400246539942230165}
   movementScript: {fileID: 400246539942230162}
   collisionScript: {fileID: 400246539942230163}
+  splitScript: {fileID: 400246541002886651}
   playerCam: {fileID: 0}
   rotationCooldown: 0.25
   rotationDegrees: 90

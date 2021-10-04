@@ -25,11 +25,10 @@ public class Player_Split : MonoBehaviour
                 {
                     // sets current player to inactive and disables player control
                     this.playerScript.activePlayer = false;
+                    this.playerScript.inputScript.moveInput = Vector3.zero;
+                    this.playerScript.rb.velocity = Vector3.zero;
 
                     Player newPlayer = SplitPlayer(this.playerScript.inputScript.split, safeList);
-
-                    // set the idle player active after everything is handled
-                    newPlayer.activePlayer = true;
                 }
                 else
                 {
@@ -69,7 +68,7 @@ public class Player_Split : MonoBehaviour
         }
     }
 
-// GENERAL FUNCTIONS ---------------------------------------------------------------------------------------------------
+    // GENERAL FUNCTIONS ---------------------------------------------------------------------------------------------------
 
     // this will give us the list of sprites that are currently active on the player;
     List<int> GetActiveSpriteList(Player player)
@@ -87,7 +86,7 @@ public class Player_Split : MonoBehaviour
         return enabledSprites;
     }
 
-// SPLITTING PLAYER ---------------------------------------------------------------------------------------------------
+    // SPLITTING PLAYER ---------------------------------------------------------------------------------------------------
 
     Player SplitPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
@@ -114,9 +113,20 @@ public class Player_Split : MonoBehaviour
         Vector3 spawnLocation = safeList[rand];
 
         // creation of the new player and setting its splitState to the split value
-        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, spawnLocation, this.playerScript.transform.rotation, null).GetComponent<Player>();
+        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, this.playerScript.transform.position, this.playerScript.transform.rotation, null).GetComponent<Player>();
         newPlayer.gameObject.name = newPlayer.gameObject.name + " " + (this.playerScript.gameManager.playerlist.Count + 1);
 
+        // maintain the players facing direction when splitting
+        newPlayer.transform.localScale = this.playerScript.transform.localScale;
+        if (newPlayer.transform.localScale.x < 0)
+        {
+            newPlayer.movementScript.m_FacingRight = false;
+        }
+
+        // ignore collision of the players durring the split animation
+        Physics.IgnoreCollision(this.playerScript.GetComponent<Collider>(), newPlayer.GetComponent<Collider>(), true);
+
+        // sets all sprites to false except for the shadow and eyes
         foreach (SpriteRenderer sprite in newPlayer.spriteRenderers)
         {
             sprite.enabled = false;
@@ -125,7 +135,20 @@ public class Player_Split : MonoBehaviour
         newPlayer.spriteRenderers[1].enabled = true;
         newPlayer.splitState = splitHealth;
 
+        // triggers the split animation as well as the direction the player moves towards
+        newPlayer.anim.SetTrigger("Split");
+        LeanTween.move(newPlayer.gameObject, spawnLocation, 0.4f).setDelay(0.6f).setOnComplete(() =>
+        {
+            newPlayer.activePlayer = true;
+            Physics.IgnoreCollision(this.playerScript.GetComponent<Collider>(), newPlayer.GetComponent<Collider>(), false);
+        });
+
         return newPlayer;
+    }
+
+    void SplitComplete(Player player)
+    {
+
     }
 
     void SplitPlayerSprites(Player player, Player newPlayer)
@@ -145,7 +168,7 @@ public class Player_Split : MonoBehaviour
 
     // Base Code from a comment at https://www.reddit.com/r/Unity3D/comments/31pcxh/how_to_check_distance_from_player_to_object_in/
     // Thanks u/ContemptuousCat!
-    List <Vector3> FindSafeAreasToSplit()
+    List<Vector3> FindSafeAreasToSplit()
     {
         List<Vector3> safeSpawns = new List<Vector3>();
 
@@ -179,7 +202,7 @@ public class Player_Split : MonoBehaviour
                 {
                     // the position that is safe
                     Vector3 safeZone = hit.point;
-                
+
                     // lets us know visually that its a safe option
                     debugCol = Color.green;
                     safeSpawns.Add(safeZone);
@@ -195,7 +218,7 @@ public class Player_Split : MonoBehaviour
         return safeSpawns;
     }
 
-// COMBINING PLAYERS  ---------------------------------------------------------------------------------------------------
+    // COMBINING PLAYERS  ---------------------------------------------------------------------------------------------------
 
     Player GetNearestPlayerBody()
     {
@@ -246,12 +269,13 @@ public class Player_Split : MonoBehaviour
     {
         List<Vector3> safeList = FindSafeAreasToSplit();
 
-        foreach(Vector3 safeSpot in safeList)
+        foreach (Vector3 safeSpot in safeList)
         {
             // Draw a yellow sphere at the transform's position
             Gizmos.color = Color.yellow;
             Gizmos.DrawSphere(safeSpot, 0.25f);
         }
+
     }
 
 }

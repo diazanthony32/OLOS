@@ -68,7 +68,8 @@ public class Player_Input : MonoBehaviour
             // Combine
             combine = Input.GetKeyDown(KeyCode.C);
         }
-        else {
+        else
+        {
             split = Player.SplitState.None;
             moveInput = Vector3.zero;
             combine = false;

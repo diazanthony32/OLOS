@@ -78,6 +78,8 @@ public class MenuManager : MonoBehaviour
         Time.timeScale = 0f;
         GameIsPaused = true;
 
+        Cursor.lockState = CursorLockMode.None;
+
         SetCurrentWithHistory(defaultPanel);
     }
 
@@ -85,6 +87,8 @@ public class MenuManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         GameIsPaused = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
 
         currentPanel.Hide();
         currentPanel = null;

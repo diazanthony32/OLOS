@@ -127,7 +127,7 @@ public class Player_Movement : MonoBehaviour
             mayJump = 0.0f;
 
             // Add a vertical force to the player.
-            Vector2 tempVelocity = playerScript.rb.velocity;
+            Vector3 tempVelocity = playerScript.rb.velocity;
             tempVelocity.y = m_JumpForce;
             playerScript.rb.velocity = tempVelocity;
 

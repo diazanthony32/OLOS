@@ -114,10 +114,12 @@ public class Player : MonoBehaviour
         if (inputScript.rotateCamClockwise)
         {
             tempRot.y += rotationDegrees;
+            gameManager.RotateTileMaps(1);
         }
         else if (inputScript.rotateCamCounterClockwise)
         {
             tempRot.y -= rotationDegrees;
+            gameManager.RotateTileMaps(-1);
         }
 
         // To check out the different easing types, go to: https://easings.net/

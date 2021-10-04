@@ -19,13 +19,22 @@ public class Player_Split : MonoBehaviour
         {
             if (playerScript.splitState > playerScript.inputScript.split)
             {
-                // sets current player to inactive and disables player control
-                this.playerScript.activePlayer = false;
+                List<Vector3> safeList = FindSafeAreasToSplit();
 
-                Player newPlayer = SplitPlayer(this.playerScript.inputScript.split);
+                if (safeList != null)
+                {
+                    // sets current player to inactive and disables player control
+                    this.playerScript.activePlayer = false;
 
-                // set the idle player active after everything is handled
-                newPlayer.activePlayer = true;
+                    Player newPlayer = SplitPlayer(this.playerScript.inputScript.split, safeList);
+
+                    // set the idle player active after everything is handled
+                    newPlayer.activePlayer = true;
+                }
+                else
+                {
+                    Debug.LogWarning("No safe spots found to split to...");
+                }
             }
             else
             {
@@ -80,12 +89,12 @@ public class Player_Split : MonoBehaviour
 
 // SPLITTING PLAYER ---------------------------------------------------------------------------------------------------
 
-    Player SplitPlayer(Player.SplitState splitHealth)
+    Player SplitPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
         this.playerScript.tag = "Shadow";
 
         // Creates the new player with the given health value
-        Player newPlayer = SpawnNewPlayer(splitHealth);
+        Player newPlayer = SpawnNewPlayer(splitHealth, safeList);
 
         // Updates the Current Player's Health State
         this.playerScript.splitState -= splitHealth;
@@ -98,13 +107,14 @@ public class Player_Split : MonoBehaviour
         return newPlayer;
     }
 
-    Player SpawnNewPlayer(Player.SplitState splitHealth)
+    Player SpawnNewPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
+        // Get a random spot in the safeList to spawn the player at
+        int rand = Random.Range(0, safeList.Count);
+        Vector3 spawnLocation = safeList[rand];
+
         // creation of the new player and setting its splitState to the split value
-        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, this.playerScript.transform.position, this.playerScript.transform.rotation, null).GetComponent<Player>();
-        var temp = newPlayer.transform.position;
-        temp.z -= 2.0f;
-        newPlayer.transform.position = temp;
+        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, spawnLocation, this.playerScript.transform.rotation, null).GetComponent<Player>();
         newPlayer.gameObject.name = newPlayer.gameObject.name + " " + (this.playerScript.gameManager.playerlist.Count + 1);
 
         foreach (SpriteRenderer sprite in newPlayer.spriteRenderers)
@@ -131,6 +141,58 @@ public class Player_Split : MonoBehaviour
 
             }
         }
+    }
+
+    // Base Code from a comment at https://www.reddit.com/r/Unity3D/comments/31pcxh/how_to_check_distance_from_player_to_object_in/
+    // Thanks u/ContemptuousCat!
+    List <Vector3> FindSafeAreasToSplit()
+    {
+        List<Vector3> safeSpawns = new List<Vector3>();
+
+        int raysToShoot = 8;
+        float raylength = 2.25f;
+
+        RaycastHit hit;
+        for (int i = 0; i < raysToShoot; i++)
+        {
+            float progress = ((float)i) / raysToShoot;
+            float angle = progress * Mathf.PI * 2;
+
+            // offset from the player origin
+            Vector3 origin = transform.position + (Vector3.up * 1);
+            Vector3 direction = transform.rotation * new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
+
+            Ray ray = new Ray(origin, direction);
+            Color debugCol = Color.red;
+
+            // Finds an intial safe location based on distance from a wall or object
+            if (!Physics.Raycast(ray, out hit, raylength))
+            {
+                // the end of the previous raycast
+                Vector3 origin2 = origin + (direction * raylength);
+                Vector3 direction2 = transform.rotation * new Vector3(0, -1f, 0);
+
+                Ray ray2 = new Ray(origin2, direction2);
+
+                // Here we check for if there is ground nearby for the play to spawn on top of
+                if (Physics.Raycast(ray2, out hit, raylength))
+                {
+                    // the position that is safe
+                    Vector3 safeZone = hit.point;
+                
+                    // lets us know visually that its a safe option
+                    debugCol = Color.green;
+                    safeSpawns.Add(safeZone);
+                }
+
+                Debug.DrawRay(ray2.origin, ray2.direction * raylength, debugCol);
+
+            }
+
+            Debug.DrawRay(ray.origin, ray.direction * raylength, debugCol);
+        }
+
+        return safeSpawns;
     }
 
 // COMBINING PLAYERS  ---------------------------------------------------------------------------------------------------
@@ -178,6 +240,18 @@ public class Player_Split : MonoBehaviour
         }
     }
 
-// ----------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    void OnDrawGizmosSelected()
+    {
+        List<Vector3> safeList = FindSafeAreasToSplit();
+
+        foreach(Vector3 safeSpot in safeList)
+        {
+            // Draw a yellow sphere at the transform's position
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawSphere(safeSpot, 0.25f);
+        }
+    }
 
 }

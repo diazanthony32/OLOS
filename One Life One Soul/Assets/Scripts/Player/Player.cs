@@ -5,11 +5,11 @@ using Cinemachine;
 
 public class Player : MonoBehaviour
 {
-    [Header("Game Manager")]
+    [Header("Game Manager: ")]
     [Space(5)]
     [SerializeField] internal GameManager gameManager;
 
-    [Header("Player Scripts")]
+    [Header("Player Scripts: ")]
     [Space(5)]
     //Store a reference to all the sub player scripts
     [SerializeField] internal Player_Input inputScript;
@@ -17,18 +17,14 @@ public class Player : MonoBehaviour
     [SerializeField] internal Player_Collision collisionScript;
     [SerializeField] internal Player_Split splitScript;
 
-    [Space(5)]
-    [SerializeField] internal CinemachineVirtualCamera playerCam;
-    [SerializeField] internal float rotationCooldown = 0.1f;
-    internal float mayRotate = 0.0f;
-    [SerializeField] internal float rotationDegrees = 45.0f;
+    internal CameraController cameraController;
 
-    [Header("Player Attributes")]
+    [Header("Player Attributes: ")]
     [Space(5)]
     [SerializeField] internal SplitState splitState = SplitState.Full;
     [SerializeField] internal PlayerState playerState = PlayerState.Idle;
 
-    [Header("Body Sprites")]
+    [Header("Body SpriteRenderers: ")]
     [Space(5)]
     [SerializeField] internal SpriteRenderer[] spriteRenderers;
 
@@ -36,7 +32,7 @@ public class Player : MonoBehaviour
     internal Animator anim;
     internal Rigidbody rb;
 
-    [SerializeField] internal bool activePlayer = false;
+    internal bool activePlayer = false;
 
     private void Awake()
     {
@@ -52,28 +48,21 @@ public class Player : MonoBehaviour
     }
 
     // Start is called before the first frame update
+    // Gets the Player Camera and Game Manager since the prefab doesnt like doing it
     void Start()
     {
-        playerCam = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera as CinemachineVirtualCamera;
+        cameraController = Camera.main.GetComponent<CameraController>();
+
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         gameManager.playerlist.Add(this);
+
+        SetActivePlayer();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if ((inputScript.rotateCamClockwise || inputScript.rotateCamCounterClockwise) && mayRotate < 0.0f)
-        {
-            mayRotate = rotationCooldown;
-            RotateCam();
-        }
-
-        // Used for Coyote Time 
-        mayRotate -= Time.deltaTime;
-
-        // Used to rotate the player sprites when the player is no longer in control
         OnCameraUpdate();
-
     }
 
     internal void ChangeState(PlayerState newState)
@@ -89,6 +78,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Takes care of unexpected death
     public void Die()
     {
         Debug.Log("b4: " + gameManager.playerlist.Count);
@@ -101,43 +91,47 @@ public class Player : MonoBehaviour
 
         if (gameManager.playerlist.Count > 0)
         {
-            playerCam.Follow = gameManager.playerlist[gameManager.playerlist.Count - 1].transform;
-            gameManager.playerlist[gameManager.playerlist.Count - 1].activePlayer = true;
+            cameraController.FollowTarget(gameManager.playerlist[gameManager.playerlist.Count - 1].transform);
+            gameManager.playerlist[gameManager.playerlist.Count - 1].SetActivePlayer();
         }
 
         Destroy(this.gameObject);
     }
 
-    void RotateCam()
-    {
-        Vector3 tempRot = playerCam.transform.eulerAngles;
-
-        if (inputScript.rotateCamClockwise)
-        {
-            tempRot.y += rotationDegrees;
-            gameManager.RotateTileMaps(1);
-        }
-        else if (inputScript.rotateCamCounterClockwise)
-        {
-            tempRot.y -= rotationDegrees;
-            gameManager.RotateTileMaps(-1);
-        }
-
-        // To check out the different easing types, go to: https://easings.net/
-        LeanTween.rotate(playerCam.gameObject, tempRot, rotationCooldown).setEaseInOutSine();
-        tempRot.x = 0.0f; // this tos to offset the camera pointing down angle
-        LeanTween.rotate(this.gameObject, tempRot, rotationCooldown).setEaseInOutSine();
-    }
-
+    // Detects a camera angle perspective change and adjusts accordingly
     void OnCameraUpdate()
     {
-        if (this.transform.eulerAngles.y != playerCam.gameObject.transform.eulerAngles.y && !activePlayer)
+        if (this.transform.eulerAngles.y != cameraController.gameObject.transform.eulerAngles.y)
         {
-            Debug.Log("Player Rotation is not aligned to the camera");
+            //Debug.Log("Player Rotation is not aligned to the camera");
             Vector3 tempRot = this.transform.eulerAngles;
-            tempRot.y = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.transform.eulerAngles.y;
+            tempRot.y = cameraController.GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.transform.eulerAngles.y;
             this.transform.eulerAngles = tempRot;
         }
+    }
+
+    // Sets al the needed variables in order to control/disable a player with an optional delay
+    public void SetActivePlayer(bool state = true, float delay = 1.0f)
+    {
+        if (state)
+        {
+            Camera.main.GetComponent<CameraController>()._currentPlayerScript = this;
+            cameraController.FollowTarget(this.transform);
+            this.tag = "Player";
+        }
+        else {
+            this.tag = "Shadow";
+        }
+
+        StartCoroutine(ExecuteAfterDelay(state, delay));
+    }
+
+    IEnumerator ExecuteAfterDelay(bool state, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // Code to execute after the delay
+        activePlayer = state ? true : false;
     }
 
     /*
@@ -150,7 +144,7 @@ public class Player : MonoBehaviour
 
     And Theoretically any Combination of that (EX. Having TL and BR, but not the others)
 
-    Problem: WAY to many sprite Variations to properly Handle
+    Problem: WAY to many sprite variations to properly Handle
     Solution: Two Sprites, The Dead Sprite always being there underneath, and having the other Sprites be in a List or Array
      
     */

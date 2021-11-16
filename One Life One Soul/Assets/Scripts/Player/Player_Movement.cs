@@ -6,36 +6,28 @@ using UnityEngine;
 public class Player_Movement : MonoBehaviour
 {
     //reference to the main player script
-    [SerializeField]
-    Player playerScript;
+    [SerializeField] internal Player playerScript;
 
-    [Header("Movement Settings")]
+    [Header("Movement Options: ")]
     [Space(5)]
-
     //main player properties
-    [SerializeField]
-    internal float movementSpeed;
+    [SerializeField] internal float movementSpeed;
 
     // Amount of force added when the player jumps.
-    [SerializeField]
-    private float m_JumpForce = 400f;
+    [SerializeField] private float m_JumpForce = 400f;
 
     // How much to smooth out the movement
     [Range(0, .3f)]
-    [SerializeField]
-    private float m_MovementSmoothing = .05f;
+    [SerializeField] private float m_MovementSmoothing = .05f;
 
     // How sensitive player sprite fliping is handled, the higher the less sensitive
-    [SerializeField]
-    private float flipDeadzone = 0.1f;
+    [SerializeField] private float flipDeadzone = 0.1f;
 
     // A mask determining what is ground to the character
-    [SerializeField]
-    internal LayerMask m_WhatIsGround;
+    [SerializeField] internal LayerMask m_WhatIsGround;
 
     // A position marking where to check if the player is grounded.
-    [SerializeField]
-    internal Transform m_GroundCheck;
+    [SerializeField] internal Transform m_GroundCheck;
 
     [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private float slowFallMultiplier = 2f;

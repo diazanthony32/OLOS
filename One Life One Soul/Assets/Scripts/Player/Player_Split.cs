@@ -8,8 +8,7 @@ public class Player_Split : MonoBehaviour
     internal Player playerScript;
 
     [Space(5)]
-    [SerializeField]
-    internal float combineDetectionRadius = 1.0f;
+    [SerializeField] internal float combineDetectionRadius = 1.0f;
 
     // Update is called once per frame
     void Update()
@@ -24,7 +23,8 @@ public class Player_Split : MonoBehaviour
                 if (safeList != null)
                 {
                     // sets current player to inactive and disables player control
-                    this.playerScript.activePlayer = false;
+                    //this.playerScript.activePlayer = false;
+                    this.playerScript.SetActivePlayer(false, 0.0f);
                     this.playerScript.inputScript.moveInput = Vector3.zero;
                     this.playerScript.rb.velocity = Vector3.zero;
 
@@ -54,12 +54,14 @@ public class Player_Split : MonoBehaviour
             if (idlePlayer != null)
             {
                 // sets current player to inactive and disables player control
-                this.playerScript.activePlayer = false;
+                //this.playerScript.activePlayer = false;
+                this.playerScript.SetActivePlayer(false, 0.0f);
 
                 CombinePlayers(this.playerScript, idlePlayer);
 
                 // set the idle player active after everything is handled
-                idlePlayer.activePlayer = true;
+                //idlePlayer.activePlayer = true;
+                idlePlayer.SetActivePlayer();
             }
             else
             {
@@ -101,7 +103,7 @@ public class Player_Split : MonoBehaviour
         // Disable active sprites from the current player to activate on the new player according to the health value
         SplitPlayerSprites(this.playerScript, newPlayer);
 
-        this.playerScript.playerCam.Follow = newPlayer.transform;
+        //this.playerScript.playerCam.Follow = newPlayer.transform;
 
         return newPlayer;
     }
@@ -113,7 +115,9 @@ public class Player_Split : MonoBehaviour
         Vector3 spawnLocation = safeList[rand];
 
         // creation of the new player and setting its splitState to the split value
-        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, this.playerScript.transform.position, this.playerScript.transform.rotation, null).GetComponent<Player>();
+        // init spawn is to make sure the spawned player is behind the current player
+        Vector3 initSpawn = this.playerScript.transform.position + (this.playerScript.transform.forward * 0.01f);
+        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, initSpawn, this.playerScript.transform.rotation, null).GetComponent<Player>();
         newPlayer.gameObject.name = newPlayer.gameObject.name + " " + (this.playerScript.gameManager.playerlist.Count + 1);
 
         // maintain the players facing direction when splitting
@@ -139,7 +143,7 @@ public class Player_Split : MonoBehaviour
         newPlayer.anim.SetTrigger("Split");
         LeanTween.move(newPlayer.gameObject, spawnLocation, 0.4f).setDelay(0.6f).setOnComplete(() =>
         {
-            newPlayer.activePlayer = true;
+            //newPlayer.SetActivePlayer(true);
             Physics.IgnoreCollision(this.playerScript.GetComponent<Collider>(), newPlayer.GetComponent<Collider>(), false);
         });
 
@@ -243,13 +247,13 @@ public class Player_Split : MonoBehaviour
 
         CombinePlayerSprites(player, idlePlayer);
 
-        player.playerCam.Follow = idlePlayer.transform;
+        //player.playerCam.Follow = idlePlayer.transform;
 
         //Removes the old Active Player
         player.gameManager.playerlist.Remove(player);
         Destroy(player.gameObject);
 
-        idlePlayer.tag = "Player";
+        //idlePlayer.tag = "Player";
     }
 
     void CombinePlayerSprites(Player player, Player idlePlayer)

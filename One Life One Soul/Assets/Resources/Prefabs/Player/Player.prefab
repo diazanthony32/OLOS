@@ -459,7 +459,7 @@ GameObject:
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2800000, guid: a281290c9f47542de8ff7e69f47224c6, type: 3}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -527,8 +527,6 @@ MonoBehaviour:
   collisionScript: {fileID: 400246539942230163}
   splitScript: {fileID: 400246541002886651}
   playerCam: {fileID: 0}
-  rotationCooldown: 0.25
-  rotationDegrees: 90
   splitState: 4
   playerState: 0
   spriteRenderers:
@@ -538,7 +536,7 @@ MonoBehaviour:
   - {fileID: 138579268}
   - {fileID: 783128792}
   - {fileID: 603308979}
-  activePlayer: 0
+  activePlayer: 1
 --- !u!114 &400246539942230165
 MonoBehaviour:
   m_ObjectHideFlags: 0

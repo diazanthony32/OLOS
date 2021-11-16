@@ -3474,14 +3474,14 @@ Tilemap:
   m_TileOrientation: 6
   m_TileOrientationMatrix:
     e00: 1
-    e01: 0
+    e01: -0
     e02: 0
     e03: 0
     e10: 0
     e11: 0.7071067
     e12: 0.7071068
     e13: 0
-    e20: 0
+    e20: -0
     e21: -0.7071068
     e22: 0.7071067
     e23: 0

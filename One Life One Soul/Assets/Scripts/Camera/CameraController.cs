@@ -1,11 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 
 public class CameraController : MonoBehaviour
 {
     [Header("Camera Options: ")]
+    [Tooltip("")]
     [Space(5)]
     [SerializeField] internal float rotationDegrees;
     [SerializeField] internal float rotationCooldown;
@@ -57,8 +56,8 @@ public class CameraController : MonoBehaviour
         LeanTween.rotate(_CMVCamera.gameObject, tempRot, rotationCooldown).setEaseInOutSine();
     }
 
-    public void FollowTarget(Transform targetTransform) {
-
+    public void FollowTarget(Transform targetTransform)
+    {
         _CMVCamera.Follow = targetTransform;
     }
 

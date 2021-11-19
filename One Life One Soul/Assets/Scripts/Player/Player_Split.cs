@@ -1,14 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player_Split : MonoBehaviour
 {
-    [SerializeField]
-    internal Player playerScript;
+    [SerializeField] internal Player playerScript;
 
     [Space(5)]
-    [SerializeField] internal float combineDetectionRadius = 1.0f;
+    [SerializeField] internal float mergeDetectionRadius = 1.0f;
 
     // Update is called once per frame
     void Update()
@@ -124,7 +122,7 @@ public class Player_Split : MonoBehaviour
         newPlayer.transform.localScale = this.playerScript.transform.localScale;
         if (newPlayer.transform.localScale.x < 0)
         {
-            newPlayer.movementScript.m_FacingRight = false;
+            newPlayer.movementScript.facingRight = false;
         }
 
         // ignore collision of the players durring the split animation
@@ -227,7 +225,7 @@ public class Player_Split : MonoBehaviour
     Player GetNearestPlayerBody()
     {
         // Grabbing the nearest idle player body 
-        Collider[] hitColliders = Physics.OverlapSphere(this.playerScript.transform.position, combineDetectionRadius);
+        Collider[] hitColliders = Physics.OverlapSphere(this.playerScript.transform.position, mergeDetectionRadius);
         foreach (Collider collider in hitColliders)
         {
             if (collider.CompareTag("Shadow") && (collider.transform != this.playerScript.transform))

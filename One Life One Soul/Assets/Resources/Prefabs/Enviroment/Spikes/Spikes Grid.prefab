@@ -43,7 +43,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 50, y: 50, z: 1.75}
+  m_Size: {x: 50, y: 1.75, z: 50}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &894230685583655320
 MonoBehaviour:
@@ -67,7 +67,7 @@ GameObject:
   m_Component:
   - component: {fileID: 894230685669716150}
   - component: {fileID: 894230685669716149}
-  - component: {fileID: 894230685669716151}
+  - component: {fileID: 234893885}
   m_Layer: 0
   m_Name: Spikes Grid
   m_TagString: Untagged
@@ -101,8 +101,8 @@ Grid:
   m_CellSize: {x: 1, y: 1, z: 0}
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
-  m_CellSwizzle: 0
---- !u!114 &894230685669716151
+  m_CellSwizzle: 1
+--- !u!114 &234893885
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 894230685669716148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e1bd13cab80d4e62b062f7a02c22fd7, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f1ca8ec0d55f4c969567d0191444f55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &894230686109311717
@@ -3470,19 +3470,19 @@ Tilemap:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -16, y: -14, z: 0}
   m_Size: {x: 34, y: 28, z: 1}
-  m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
+  m_TileAnchor: {x: 0.5, y: 0.5, z: 0.5}
   m_TileOrientation: 6
   m_TileOrientationMatrix:
     e00: 1
-    e01: -0
+    e01: 0
     e02: 0
     e03: 0
     e10: 0
     e11: 0.7071067
-    e12: 0.7071068
+    e12: -0.7071068
     e13: 0
-    e20: -0
-    e21: -0.7071068
+    e20: 0
+    e21: 0.7071068
     e22: 0.7071067
     e23: 0
     e30: 0

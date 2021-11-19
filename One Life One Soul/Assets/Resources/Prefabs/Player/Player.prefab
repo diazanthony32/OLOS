@@ -526,7 +526,6 @@ MonoBehaviour:
   movementScript: {fileID: 400246539942230162}
   collisionScript: {fileID: 400246539942230163}
   splitScript: {fileID: 400246541002886651}
-  playerCam: {fileID: 0}
   splitState: 4
   playerState: 0
   spriteRenderers:
@@ -536,7 +535,6 @@ MonoBehaviour:
   - {fileID: 138579268}
   - {fileID: 783128792}
   - {fileID: 603308979}
-  activePlayer: 1
 --- !u!114 &400246539942230165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -564,16 +562,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerScript: {fileID: 400246539942230164}
   movementSpeed: 350
-  m_JumpForce: 5
-  m_MovementSmoothing: 0.12
-  flipDeadzone: 0.1
-  m_WhatIsGround:
+  jumpForce: 6
+  coyoteTime: 0.25
+  softLand: 1
+  movementSmoothing: 0.05
+  whatIsGround:
     serializedVersion: 2
     m_Bits: 64
   m_GroundCheck: {fileID: 1504613100}
+  flipDeadzone: 0.1
   fallMultiplier: 2
   slowFallMultiplier: 1.25
   fastFallMultiplier: 1.5
+  slopeLimit: 40
+  slopeSlideSpeed: 5
+  antiBump: 4.9
+  stepHeightRatio: 0.25
 --- !u!114 &400246539942230163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -600,7 +604,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 400246539942230164}
-  combineDetectionRadius: 1.75
+  mergeDetectionRadius: 1
 --- !u!1 &400246540845576321
 GameObject:
   m_ObjectHideFlags: 0

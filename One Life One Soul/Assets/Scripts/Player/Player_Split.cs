@@ -23,7 +23,8 @@ public class Player_Split : MonoBehaviour
                     // sets current player to inactive and disables player control
                     //this.playerScript.activePlayer = false;
                     this.playerScript.SetActivePlayer(false, 0.0f);
-                    this.playerScript.inputScript.moveInput = Vector3.zero;
+                    this.playerScript.inputScript.moveInputX = 0;
+                    this.playerScript.inputScript.moveInputY = 0;
                     this.playerScript.rb.velocity = Vector3.zero;
 
                     Player newPlayer = SplitPlayer(this.playerScript.inputScript.split, safeList);
@@ -122,7 +123,7 @@ public class Player_Split : MonoBehaviour
         newPlayer.transform.localScale = this.playerScript.transform.localScale;
         if (newPlayer.transform.localScale.x < 0)
         {
-            newPlayer.movementScript.facingRight = false;
+            //newPlayer.movementScript.facingRight = false;
         }
 
         // ignore collision of the players durring the split animation

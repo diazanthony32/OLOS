@@ -561,23 +561,76 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 400246539942230164}
-  movementSpeed: 350
-  jumpForce: 6
-  coyoteTime: 0.25
-  softLand: 1
-  movementSmoothing: 0.05
-  whatIsGround:
+  maxSpeed: 8
+  acceleration: 50
+  maxAcceleration: 200
+  accelerationFactorFromDot:
     serializedVersion: 2
-    m_Bits: 64
-  m_GroundCheck: {fileID: 1504613100}
-  flipDeadzone: 0.1
-  fallMultiplier: 2
-  slowFallMultiplier: 1.25
-  fastFallMultiplier: 1.5
-  slopeLimit: 40
-  slopeSlideSpeed: 5
-  antiBump: 4.9
-  stepHeightRatio: 0.25
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxAccelerationFactorFromDot:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  forceScale: {x: 1, y: 0, z: 1}
 --- !u!114 &400246539942230163
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -6,58 +6,28 @@ public class Player_Movement : MonoBehaviour
     //reference to the main player script
     [SerializeField] internal Player playerScript;
 
-    [Header("Movement Options: ")]
-    [Tooltip("")]
-    //main player properties
-    [SerializeField] internal float movementSpeed;
+    [Header("Locomotion Options: ")]
+    [Tooltip("The max speed the physics character can move")]                                                       // how fast the player is allowed to move
+    [SerializeField] internal float maxSpeed = 8;
 
-    // Amount of force added when the player jumps.
-    [SerializeField] private float jumpForce = 400f;
+    [Tooltip("How fast the physics character can normally get to the max speed set")]                               // how fast the player can get to maxSpeed
+    [SerializeField] internal float acceleration = 50;
 
-    // Buffers a jump for the Player in case the jump a fraction of a second too late
-    [Tooltip("wow jump")]
-    [SerializeField] internal float coyoteTime = 0.25f;
-    internal float mayJump;
+    [Tooltip("The fastest the physics character can possibly go get to the max speed")]                             // fastest the player can get to maxSpeed
+    [SerializeField] internal float maxAcceleration = 200;
 
-    [SerializeField] internal bool softLand = true;
+    [Tooltip("The acceleration force curve based on rapid movement. Time is direction, value is speed")]            // adjusts the acceleration force when changing directions rapidly
+    [SerializeField] internal AnimationCurve accelerationFactorFromDot;
 
-    // How much to smooth out the movement
-    [Range(0, .3f)]
-    [SerializeField] private float movementSmoothing = .05f;
+    [Tooltip("The scale of the force applied to the player on individual axes")]                                    // adjusts the scale of the force applied to the player on each axes
+    [SerializeField] internal Vector3 forceScale = new Vector3(1.0f, 0.0f, 1.0f); 
 
-    // A mask determining what is ground to the character
-    [SerializeField] internal LayerMask whatIsGround;
+    [Space(10)]
 
-    // A position marking where to check if the player is grounded.
-    [SerializeField] internal Transform m_GroundCheck;
-
-    [Space(5)]
-    // How sensitive player sprite fliping is handled, the higher the less sensitive
-    [SerializeField] private float flipDeadzone = 0.1f;
-
-    [Header("Falling Options: ")]
-    [Tooltip("")]
-    [SerializeField] private float fallMultiplier = 2.5f;
-    [SerializeField] private float slowFallMultiplier = 2f;
-    [SerializeField] private float fastFallMultiplier = 2f;
-
-    private float _groundRayDistance;
-    private RaycastHit _slopeHit;
-
-    const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
-    private bool grounded;            // Whether or not the player is grounded.
-    internal bool facingRight = true;  // For determining which way the player is currently facing.
-
-    [Header("Uneven Flooring Options: ")]
-    [Tooltip("")]
-    [SerializeField][Range(10, 80)] internal float slopeLimit = 50.0f;
-    [SerializeField] [Range(1, 10)] internal float slopeSlideSpeed = 2.5f;
-    //this is temporary
-    [SerializeField] internal float antiBump = -Physics.gravity.y/2;
-
-    [SerializeField] [Range(0, 1)] internal float stepHeightRatio = 0.25f;
-
-    private Vector3 velocity = Vector3.zero;
+    [Header("OLOS Options: ")]
+    [Tooltip("How fast the player must move in a direction to flip around. Aids in preventing random flips")]               // aids in preventing random player flipping 
+    [SerializeField] internal float flipDeadzone = 0.1f;
+    private bool facingRight = true;
 
     void Start()
     {
@@ -67,107 +37,37 @@ public class Player_Movement : MonoBehaviour
 
     private void Update()
     {
-        // Used for Coyote Time 
-        mayJump -= Time.deltaTime;
+        SetPlayerOrientation();
     }
 
     // Fixed Update is called once per Physics Update
     void FixedUpdate()
     {
-        IsGrounded();
-
-        Move(playerScript.inputScript.moveInput, playerScript.inputScript.jumping);
-        SlopeMovement();
+        Move();
     }
 
-    public void Move(Vector3 move, bool jump)
+    void Move()
     {
-        // Smoothly move the character to the target velocity after first adjusting the velocity to the players corect orientation
-        // Sets velocity to a slight constant upward force if grounded to prevent weird bumps lifts (anti-bump)
-        Vector3 targetVelocity;
+        // gets the input from the player
+        Vector3 _move = new Vector3(playerScript.inputScript.moveInputX, 0, playerScript.inputScript.moveInputY);
+        Vector3 _translateMoveVector = transform.TransformDirection(_move);
 
-        targetVelocity = new Vector3(move.x * movementSpeed * Time.fixedDeltaTime, playerScript.rb.velocity.y, move.y * movementSpeed * Time.fixedDeltaTime);
+        // determines the target velocity while leaving the players y-velocity intact
+        Vector3 _targetVelocity = _translateMoveVector * maxSpeed;
+        _targetVelocity.y = playerScript.rb.velocity.y;
 
-        Vector3 translatedVelocity = playerScript.transform.TransformDirection(targetVelocity);
-        playerScript.rb.velocity = Vector3.SmoothDamp(playerScript.rb.velocity, translatedVelocity, ref velocity, movementSmoothing);
+        // gets the direction the Player is moving and adjusts the acceleration force when changing directions rapidly
+        Vector3 _velocityNormalized = playerScript.rb.velocity.normalized;
+        float _velocityDot = Vector3.Dot(_translateMoveVector, _velocityNormalized);
+        float _adjustedAcceleration = acceleration * accelerationFactorFromDot.Evaluate(_velocityDot);
 
+        // calculates the acceleration needed to move towards the goal speed per physics update
+        Vector3 _goalVelocity = Vector3.MoveTowards(playerScript.rb.velocity, _targetVelocity, _adjustedAcceleration * Time.fixedDeltaTime);
+        Vector3 _neededAcceleration = ((_goalVelocity - playerScript.rb.velocity) / Time.fixedDeltaTime);
+        _neededAcceleration = Vector3.ClampMagnitude(_neededAcceleration, maxAcceleration);
 
-        if (OnSlope())
-        {
-            var slopeDirection = GetSlopeDirection();
-            var velocityOffset = slopeDirection * -Physics.gravity.y * 10;
-
-            playerScript.rb.AddForce(velocityOffset);
-            //targetVelocity += velocityOffset;
-
-            //var temp = targetVelocity;
-            //temp.y = antiBump;
-            //targetVelocity = temp;
-        }
-
-        // If there is movement, it will swap to the walking animation
-        playerScript.anim.SetFloat("Walking", Math.Abs(move.x) + Math.Abs(move.y));
-
-        // InverseTransformDirection converts the Velocity of the Player from World to Local to Adjust when the Camera Moves
-        // If the player is moving to the right and the player is currently facing left...
-        if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x > flipDeadzone && !facingRight)
-        {
-            Flip();
-        }
-        // Otherwise if the player is moving to the left and the player is currently facing right...
-        else if (playerScript.transform.InverseTransformDirection(playerScript.rb.velocity).x < -flipDeadzone && facingRight)
-        {
-            Flip();
-        }
-
-        // If the player should try to jump while on the ground or during the coyoteTimeForgiveness period, the Player Jumps
-        if ((grounded || mayJump > 0.0f) && jump)
-        {
-            grounded = false;
-            mayJump = 0.0f;
-
-            // Add a vertical force to the player.
-            Vector3 tempVelocity = playerScript.rb.velocity;
-            tempVelocity.y = jumpForce;
-            playerScript.rb.velocity = tempVelocity;
-
-            //softLand = false;
-        }
-
-        // Player holds Jump For the entire duration of the Jump
-        // ideally this should be the farthest you can jump
-        if (playerScript.rb.velocity.y > 0 && jump)
-        {
-            //Debug.Log("Player held jump all through the jump");
-        }
-        // Player is jumping but lets go of Jump
-        // ideally the player should descent pretty rapidly
-        else if (playerScript.rb.velocity.y > 0 && !jump)
-        {
-            playerScript.rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier * (fastFallMultiplier)) * Time.deltaTime;
-            //Debug.Log("Player let go of jump midway of jumping");
-        }
-        // Player is falling and is holding Jump
-        // ideally the player should still land fast but not as fast as letting go comepletely
-        else if (playerScript.rb.velocity.y < 0 && jump)
-        {
-            playerScript.rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier * slowFallMultiplier) * Time.deltaTime;
-            //Debug.Log("Player is falling while holding jump");
-        }
-        // Player is falling and lets go of Jump
-        // ideally the player should descent pretty rapidly
-        else if (playerScript.rb.velocity.y < 0 && !jump)
-        {
-            playerScript.rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier * (fastFallMultiplier)) * Time.deltaTime;
-            //Debug.Log("Player is falling");
-        }
-
-        // Idle if the player is no longer moving in any direction whatsoever
-        if (playerScript.rb.velocity == Vector3.zero)
-        {
-            //Debug.Log("Player is idle");
-            //playerScript.ChangeState(Player.PlayerState.Idle);
-        }
+        // applys the force to the player
+        playerScript.rb.AddForce(Vector3.Scale(_neededAcceleration * playerScript.rb.mass, forceScale));
 
     }
 
@@ -176,87 +76,32 @@ public class Player_Movement : MonoBehaviour
 
     }
 
-    bool OnSlope() {
-        if (!IsGrounded())
-            return false;
+    void SetPlayerOrientation()
+    {
+        // gets the players velocity according to the players local space rather than world space
+        float playerVelocity = transform.InverseTransformDirection(playerScript.rb.velocity).x;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, (playerScript.collisionScript._playerCollider.height / 2) + _groundRayDistance))
-            if (_slopeHit.normal != Vector3.up)
-                return true;
-        return false;
-    }
-
-    bool OnSteepSlope() {
-
-        if (!OnSlope())
-            return false;
-
-        float _slopeAngle = Vector3.Angle(_slopeHit.normal, Vector3.up);
-        if (_slopeAngle  > slopeLimit)
+        // Flips the player according to current facing direction and move direction
+        if (playerVelocity > flipDeadzone && !facingRight)
         {
-            return true;
+            Flip();
         }
-        
-        return false;
-    }
-
-    void SlopeMovement()
-    {
-        if (OnSteepSlope())
+        else if (playerVelocity < -flipDeadzone && facingRight)
         {
-            Vector3 slopeDirection = GetSlopeDirection();
-            float slideSpeed = movementSpeed + slopeSlideSpeed + Time.deltaTime;
-
-            velocity = slopeDirection * -slideSpeed;
-            velocity.y += -_slopeHit.point.y;
-        }
-    }
-
-    Vector3 GetSlopeDirection()
-    {
-        return Vector3.up - _slopeHit.normal * Vector3.Dot(Vector3.up, _slopeHit.normal);
-    }
-
-    bool IsGrounded()
-    {
-        grounded = false;
-
-        // Checking the player's ground Check to see if the player is currently grounded
-        Collider[] hitColliders = Physics.OverlapSphere(m_GroundCheck.position, k_GroundedRadius, whatIsGround);
-        foreach (var hitCollider in hitColliders)
-        {
-            grounded = true;
-            mayJump = coyoteTime;
-
-            //// This is to reset the player's vertical velocity to prevent falling through the floor at high speeds
-            //if (!softLand)
-            //{
-            //    Vector3 tmpVel = playerScript.rb.velocity;
-            //    tmpVel.y = -1.0f;
-            //    playerScript.rb.velocity = tmpVel;
-            //    softLand = true;
-            //}
+            Flip();
         }
 
-        return grounded;
     }
 
-    public void Flip()
+    void Flip()
     {
-        // Switch the way the player is labelled as facing
+        // Switch the way the player is labeled as facing
         facingRight = !facingRight;
 
-        // Multiply the player's x local scale by -1.
-        Vector3 theScale = transform.localScale;
-        theScale.x *= -1;
-        transform.localScale = theScale;
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        // Draw a yellow sphere at the transform's position
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(m_GroundCheck.position, k_GroundedRadius);
+        // Multiply the player's x local scale by -1 to flip the player's gameobject
+        Vector3 flippedScale = transform.localScale;
+        flippedScale.x *= -1;
+        transform.localScale = flippedScale;
     }
 
 }

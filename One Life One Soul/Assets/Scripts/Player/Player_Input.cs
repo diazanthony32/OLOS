@@ -7,7 +7,40 @@ public class Player_Input : MonoBehaviour
     [SerializeField]
     internal Player playerScript;
 
-    internal Vector3 moveInput;
+    [Header("General Options: ")]
+    [Tooltip("The max speed the physics character can move")]                   // String for getting a player's horizontal input
+    [SerializeField] internal string horizontalInputAxis = "Horizontal";
+
+    [Tooltip("The max speed the physics character can move")]                   // String for getting a player's vertical input
+    [SerializeField] internal string verticalInputAxis = "Vertical";
+
+    [Tooltip("The max speed the physics character can move")]                   // Key for making the player jump
+    [SerializeField] internal KeyCode jumpKey = KeyCode.Space;
+
+    [Tooltip("Bybass Unity's internal input smoothing")]                        // If this is enabled, Unity's internal input smoothing is bypassed
+    [SerializeField] internal bool useRawInput = true;                          
+
+
+    [Header("OLOS Options: ")]
+    [Tooltip("Option for splitting/merging to be done automatically based on player body " +                    // Asks the Player if they want splitting to be done automatically
+             "proximity and splitting type. Disables manual splitting/merging")]                                // Will have to option to split either 'one-at-a-time' or 'soulCount-1' 
+    [SerializeField] internal bool useAutoSplitMerge = true;
+
+    [Tooltip("Input to auto split/merge the player's soul if 'Auto Split Merge' is enabled. " +                 // Key input for auto split merge or manual merging 
+             "If not, it is to merge the player's soul")]
+    [SerializeField] internal KeyCode splitMergeKey = KeyCode.F;                                                      
+
+    [Tooltip("Input to swap actively controlled soul")]                                                         // Key for swapping camera follow target
+    [SerializeField] internal KeyCode swapSoulKey = KeyCode.Tab;                                                  
+
+    [Tooltip("Input to rotate the player's camera clockwise")]                                                  // Key for rotating camera clockwise
+    [SerializeField] internal KeyCode rotateClockwiseKey = KeyCode.E;
+
+    [Tooltip("Input to rotate the player's camera counter-clockwise")]                                          // Key for rotating camera counter-clockwise
+    [SerializeField] internal KeyCode rotateCounterClockwiseKey = KeyCode.Q;
+
+    internal float moveInputX;
+    internal float moveInputY;
 
     internal bool jumping = false;
 
@@ -36,9 +69,8 @@ public class Player_Input : MonoBehaviour
             //https://docs.unity3d.com/ScriptReference/KeyCode.html
 
             // Directional Movement
-            moveInput.x = Input.GetAxisRaw("Horizontal");
-            moveInput.y = Input.GetAxisRaw("Vertical");
-            moveInput.Normalize();
+            moveInputX = Input.GetAxisRaw("Horizontal");
+            moveInputY = Input.GetAxisRaw("Vertical");
 
             // Jumping
             jumping = Input.GetButton("Jump");
@@ -71,11 +103,20 @@ public class Player_Input : MonoBehaviour
         else
         {
             split = Player.SplitState.None;
-            moveInput = Vector3.zero;
+            moveInputX = 0;
+            moveInputY = 0;
             combine = false;
             jumping = false;
             rotateCamClockwise = false;
             rotateCamCounterClockwise = false;
         }
+    }
+
+    public float GetHorizontalMovementInput()
+    {
+        if (useRawInput)
+            return Input.GetAxisRaw(horizontalInputAxis);
+        else
+            return Input.GetAxis(horizontalInputAxis);
     }
 }

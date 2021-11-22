@@ -34,15 +34,15 @@ public class Player_Input : MonoBehaviour
     [SerializeField] internal KeyCode swapSoulKey = KeyCode.Tab;                                                  
 
     [Tooltip("Input to rotate the player's camera clockwise")]                                                  // Key for rotating camera clockwise
-    [SerializeField] internal KeyCode rotateClockwiseKey = KeyCode.E;
+    [SerializeField] internal KeyCode rotateClockwiseKey = KeyCode.Q;
 
     [Tooltip("Input to rotate the player's camera counter-clockwise")]                                          // Key for rotating camera counter-clockwise
-    [SerializeField] internal KeyCode rotateCounterClockwiseKey = KeyCode.Q;
+    [SerializeField] internal KeyCode rotateCounterClockwiseKey = KeyCode.E;
 
     internal float moveInputX;
     internal float moveInputY;
 
-    internal bool jumping = false;
+    internal bool jump;
 
     internal bool rotateCamClockwise;
     internal bool rotateCamCounterClockwise;
@@ -66,20 +66,14 @@ public class Player_Input : MonoBehaviour
 
         if (playerScript.activePlayer)
         {
-            //https://docs.unity3d.com/ScriptReference/KeyCode.html
+            moveInputX = Input.GetAxisRaw(horizontalInputAxis.ToString());                                  //
+            moveInputY = Input.GetAxisRaw(verticalInputAxis.ToString());                                    //
 
-            // Directional Movement
-            moveInputX = Input.GetAxisRaw("Horizontal");
-            moveInputY = Input.GetAxisRaw("Vertical");
+            jump = Input.GetKeyDown(jumpKey);                                                  //
 
-            // Jumping
-            jumping = Input.GetButton("Jump");
+            rotateCamClockwise = Input.GetKeyDown(rotateClockwiseKey);                           //
+            rotateCamCounterClockwise = Input.GetKeyDown(rotateCounterClockwiseKey);             // 
 
-            // Camera Rotation
-            rotateCamClockwise = Input.GetKeyDown(KeyCode.Q);
-            rotateCamCounterClockwise = Input.GetKeyDown(KeyCode.E);
-
-            // Splitting
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 split = Player.SplitState.Quarter;
@@ -97,7 +91,6 @@ public class Player_Input : MonoBehaviour
                 split = Player.SplitState.None;
             }
 
-            // Combine
             combine = Input.GetKeyDown(KeyCode.C);
         }
         else
@@ -106,7 +99,7 @@ public class Player_Input : MonoBehaviour
             moveInputX = 0;
             moveInputY = 0;
             combine = false;
-            jumping = false;
+            jump = false;
             rotateCamClockwise = false;
             rotateCamCounterClockwise = false;
         }

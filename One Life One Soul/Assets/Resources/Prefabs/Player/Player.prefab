@@ -548,6 +548,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 400246539942230164}
+  horizontalInputAxis: Horizontal
+  verticalInputAxis: Vertical
+  jumpKey: 32
+  useRawInput: 1
+  useAutoSplitMerge: 1
+  splitMergeKey: 102
+  swapSoulKey: 9
+  rotateClockwiseKey: 101
+  rotateCounterClockwiseKey: 113
 --- !u!114 &400246539942230162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,40 +606,16 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxAccelerationFactorFromDot:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -1
-      value: 2
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 136
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   forceScale: {x: 1, y: 0, z: 1}
+  jumpForce: 6
+  coyoteTimeForgiveness: 0.25
+  jumpBuffer: 0.25
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  groundCheckOffest: {x: 0, y: 0, z: 0}
+  groundCheckRadius: 0.2
+  flipDeadzone: 0.1
 --- !u!114 &400246539942230163
 MonoBehaviour:
   m_ObjectHideFlags: 0

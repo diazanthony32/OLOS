@@ -54,8 +54,8 @@ public class Player_Movement : MonoBehaviour
 
     [Header("OLOS Options: ")]
     [Tooltip("How fast the player must move in a direction to flip around. Aids in preventing random flips")]       // aids in preventing random player flipping 
-    [SerializeField] internal float flipDeadzone = 0.1f;
-    private bool facingRight = true;
+    [SerializeField] private float flipDeadzone = 0.1f;
+    internal bool facingRight = true;
 
     void Start()
     {

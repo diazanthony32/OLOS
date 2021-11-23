@@ -18,12 +18,12 @@ public class Platforms : MonoBehaviour
         //Debug.Log(other.transform.name + " has entered the Trigger!");
         other.transform.parent = this.transform;
 
-        SetChildRotation(other);
+        //SetChildRotation(other);
     }
 
     private void OnTriggerStay(Collider other)
     {
-        SetChildRotation(other);
+        //SetChildRotation(other);
     }
 
     private void OnTriggerExit(Collider other)
@@ -31,14 +31,13 @@ public class Platforms : MonoBehaviour
         //Debug.Log(other.transform.name + " has left the Trigger...");
         other.transform.parent = null;
 
-        SetChildRotation(other);
+        //SetChildRotation(other);
     }
 
-    private void SetChildRotation(Collider other)
-    {
-        Vector3 tempRot = other.transform.eulerAngles;
-        tempRot.y = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.transform.eulerAngles.y;
-        Debug.Log(tempRot);
-        other.transform.eulerAngles = tempRot;
-    }
+    //private void SetChildRotation(Collider other)
+    //{
+    //    Vector3 tempRot = other.transform.eulerAngles;
+    //    tempRot.y = Camera.main.GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.transform.eulerAngles.y;
+    //    other.transform.eulerAngles = tempRot;
+    //}
 }

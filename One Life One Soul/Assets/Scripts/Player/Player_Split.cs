@@ -12,6 +12,11 @@ public class Player_Split : MonoBehaviour
     [Tooltip("The offset of the player's center for merge checks")]                         // player center offset
     [SerializeField] internal Vector3 playerCenterOffest;
 
+    [Tooltip("The offset of the player's center for merge checks")]                         // player center offset
+    [SerializeField] internal LayerMask soulMask;
+
+    private Collider[] soulColliders = new Collider[1];
+    private bool soulNearby => Physics.OverlapSphereNonAlloc(transform.position + playerCenterOffest, mergeDetectionRadius, soulColliders, soulMask, QueryTriggerInteraction.Ignore) > 0;
 
     /*
      Note:
@@ -31,13 +36,12 @@ public class Player_Split : MonoBehaviour
             // player is using auto split merge, the game will determine on whether to split or merge depending on the players relative position to other souls
             if (playerScript.inputScript.useAutoSplitMerge)
             {
-                Player soulNearby = GetNearestPlayerBody();
-                if (soulNearby != null)
+                if (soulNearby)
                 {
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
                     this.playerScript.SetActivePlayer(false, 0.0f);
-                    CombinePlayers(this.playerScript, soulNearby);
-                    soulNearby.SetActivePlayer();
+                    CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
+                    soulColliders[0].GetComponent<Player>().SetActivePlayer();
                 }
                 // if there are no nearby souls, the player is then split by the player's prefered method as long as the player has enough soul
                 else
@@ -71,13 +75,12 @@ public class Player_Split : MonoBehaviour
             // player is using manual controls (splitMerge is the merge button)
             else
             {
-                Player soulNearby = GetNearestPlayerBody();
-                if (soulNearby != null)
+                if (soulNearby)
                 {
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
-                    this.playerScript.SetActivePlayer(false, 0.0f);
-                    CombinePlayers(this.playerScript, soulNearby);
-                    soulNearby.SetActivePlayer();
+                    playerScript.SetActivePlayer(false, 0.0f);
+                    CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
+                    soulColliders[0].GetComponent<Player>().SetActivePlayer();
                 }
                 else
                 {
@@ -127,7 +130,7 @@ public class Player_Split : MonoBehaviour
 
     Player SplitPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
-        this.playerScript.tag = "Shadow";
+        gameObject.layer = LayerMask.NameToLayer("Soul");
 
         // Creates the new player with the given health value
         Player newPlayer = SpawnNewPlayer(splitHealth, safeList);
@@ -159,7 +162,7 @@ public class Player_Split : MonoBehaviour
         newPlayer.transform.localScale = this.playerScript.transform.localScale;
         if (newPlayer.transform.localScale.x < 0)
         {
-            //newPlayer.movementScript.facingRight = false;
+            newPlayer.movementScript.facingRight = false;
         }
 
         // ignore collision of the players durring the split animation
@@ -252,20 +255,20 @@ public class Player_Split : MonoBehaviour
         return safeSpawns;
     }
 
-    Player GetNearestPlayerBody()
-    {
-        // Grabbing the nearest idle player body 
-        Collider[] hitColliders = Physics.OverlapSphere(playerScript.transform.position + playerCenterOffest, mergeDetectionRadius);
-        foreach (Collider collider in hitColliders)
-        {
-            if (collider.CompareTag("Shadow") && (collider.transform != playerScript.transform))
-            {
-                return collider.GetComponent<Player>();
-            }
-        }
+    //Player GetNearestPlayerBody()
+    //{
+    //    // Grabbing the nearest idle player body 
+    //    Collider[] hitColliders = Physics.OverlapSphere(playerScript.transform.position + playerCenterOffest, mergeDetectionRadius);
+    //    foreach (Collider collider in hitColliders)
+    //    {
+    //        if (collider.CompareTag("Shadow") && (collider.transform != playerScript.transform))
+    //        {
+    //            return collider.GetComponent<Player>();
+    //        }
+    //    }
 
-        return null;
-    }
+    //    return null;
+    //}
 
     void CombinePlayers(Player player, Player idlePlayer)
     {
@@ -309,7 +312,7 @@ public class Player_Split : MonoBehaviour
         }
 
         // for merge detection
-        Gizmos.color = Color.red;
+        Gizmos.color = soulNearby ? Color.green : Color.red;
         Gizmos.DrawWireSphere(transform.position + playerCenterOffest, mergeDetectionRadius);
     }
 

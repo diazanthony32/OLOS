@@ -116,11 +116,11 @@ public class Player : MonoBehaviour
         {
             Camera.main.GetComponent<CameraController>()._currentPlayerScript = this;
             cameraController.FollowTarget(this.transform);
-            this.tag = "Player";
+            gameObject.layer = LayerMask.NameToLayer("Player");
         }
         else
         {
-            this.tag = "Shadow";
+            gameObject.layer = LayerMask.NameToLayer("Soul");
         }
 
         StartCoroutine(ExecuteAfterDelay(state, delay));

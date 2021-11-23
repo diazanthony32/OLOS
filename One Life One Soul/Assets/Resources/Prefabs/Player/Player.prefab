@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 138579266}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 400246540845576320}
   m_RootOrder: 3
@@ -108,7 +108,7 @@ Transform:
   m_GameObject: {fileID: 452127069}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.01}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 400246540845576320}
   m_RootOrder: 0
@@ -190,7 +190,7 @@ Transform:
   m_GameObject: {fileID: 603308977}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 400246540845576320}
   m_RootOrder: 5
@@ -272,7 +272,7 @@ Transform:
   m_GameObject: {fileID: 783128790}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 400246540845576320}
   m_RootOrder: 4
@@ -354,7 +354,7 @@ Transform:
   m_GameObject: {fileID: 976077533}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 400246540845576320}
   m_RootOrder: 2
@@ -456,7 +456,7 @@ GameObject:
   - component: {fileID: 400246539942230162}
   - component: {fileID: 400246539942230163}
   - component: {fileID: 400246541002886651}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 2800000, guid: a281290c9f47542de8ff7e69f47224c6, type: 3}
@@ -554,7 +554,7 @@ MonoBehaviour:
   useRawInput: 1
   useAutoSplitMerge: 1
   splitMergeKey: 102
-  splitBy: 1
+  splitBy: 0
   swapSoulKey: 9
   rotateClockwiseKey: 101
   rotateCounterClockwiseKey: 113
@@ -571,8 +571,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 400246539942230164}
-  maxSpeed: 8
-  acceleration: 50
+  maxSpeed: 6
+  acceleration: 60
   maxAcceleration: 200
   accelerationFactorFromDot:
     serializedVersion: 2
@@ -608,7 +608,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   forceScale: {x: 1, y: 0, z: 1}
-  jumpForce: 6
+  jumpForce: 5
   coyoteTimeForgiveness: 0.25
   jumpBuffer: 0.25
   groundMask:
@@ -645,6 +645,9 @@ MonoBehaviour:
   playerScript: {fileID: 400246539942230164}
   mergeDetectionRadius: 2
   playerCenterOffest: {x: 0, y: 0.5, z: 0}
+  soulMask:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &400246540845576321
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,7 +674,7 @@ Transform:
   m_GameObject: {fileID: 400246540845576321}
   m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.25, y: 2.25, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 452127070}
   - {fileID: 8188424728830635689}
@@ -727,7 +730,7 @@ Transform:
   m_GameObject: {fileID: 914793896973291512}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.01}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 400246540845576320}
   m_RootOrder: 1

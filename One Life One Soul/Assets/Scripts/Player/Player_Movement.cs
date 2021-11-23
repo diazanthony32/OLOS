@@ -65,6 +65,8 @@ public class Player_Movement : MonoBehaviour
 
     private void Update()
     {
+        if (!playerScript.activePlayer) return;
+
         SetPlayerOrientation();
         DetermineMayJump();
     }
@@ -72,6 +74,8 @@ public class Player_Movement : MonoBehaviour
     // Fixed Update is called once per Physics Update
     void FixedUpdate()
     {
+        if (!playerScript.activePlayer) return;
+
         Move();
     }
 
@@ -100,6 +104,8 @@ public class Player_Movement : MonoBehaviour
 
         // applys the force to the player
         playerScript.rb.AddForce(Vector3.Scale(_neededAcceleration * playerScript.rb.mass, forceScale));
+
+        playerScript.anim.SetFloat("Walking", (Mathf.Abs(playerScript.rb.velocity.x) + Mathf.Abs(playerScript.rb.velocity.z)));
 
         if (mayJump)
             Jump();

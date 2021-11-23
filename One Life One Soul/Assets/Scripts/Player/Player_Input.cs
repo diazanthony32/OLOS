@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player_Input : MonoBehaviour
@@ -9,16 +7,16 @@ public class Player_Input : MonoBehaviour
 
     [Header("General Options: ")]
     [Tooltip("The max speed the physics character can move")]                   // String for getting a player's horizontal input
-    [SerializeField] internal string horizontalInputAxis = "Horizontal";
+    [SerializeField] private string horizontalInputAxis = "Horizontal";
 
     [Tooltip("The max speed the physics character can move")]                   // String for getting a player's vertical input
-    [SerializeField] internal string verticalInputAxis = "Vertical";
+    [SerializeField] private string verticalInputAxis = "Vertical";
 
     [Tooltip("The max speed the physics character can move")]                   // Key for making the player jump
-    [SerializeField] internal KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
 
     [Tooltip("Bybass Unity's internal input smoothing")]                        // If this is enabled, Unity's internal input smoothing is bypassed
-    [SerializeField] internal bool useRawInput = true;                          
+    [SerializeField] private bool useRawInput = false;
 
 
     [Header("OLOS Options: ")]
@@ -28,24 +26,32 @@ public class Player_Input : MonoBehaviour
 
     [Tooltip("Input to auto split/merge the player's soul if 'Auto Split Merge' is enabled. " +                 // Key input for auto split merge or manual merging 
              "If not, it is to merge the player's soul")]
-    [SerializeField] internal KeyCode splitMergeKey = KeyCode.F;                                                      
+    [SerializeField] private KeyCode splitMergeKey = KeyCode.F;
 
     [Tooltip("Input to swap actively controlled soul")]                                                         // Key for swapping camera follow target
-    [SerializeField] internal KeyCode swapSoulKey = KeyCode.Tab;                                                  
+    [SerializeField] internal SplitBy splitBy = SplitBy.Max;
+
+    [Tooltip("Input to swap actively controlled soul")]                                                         // Key for swapping camera follow target
+    [SerializeField] private KeyCode swapSoulKey = KeyCode.Tab;
 
     [Tooltip("Input to rotate the player's camera clockwise")]                                                  // Key for rotating camera clockwise
-    [SerializeField] internal KeyCode rotateClockwiseKey = KeyCode.Q;
+    [SerializeField] private KeyCode rotateClockwiseKey = KeyCode.Q;
 
     [Tooltip("Input to rotate the player's camera counter-clockwise")]                                          // Key for rotating camera counter-clockwise
-    [SerializeField] internal KeyCode rotateCounterClockwiseKey = KeyCode.E;
+    [SerializeField] private KeyCode rotateCounterClockwiseKey = KeyCode.E;
 
-    internal float moveInputX;
-    internal float moveInputY;
 
-    internal bool jump;
+    // what other scripts will have access to
+    internal float moveInputX => useRawInput ? Input.GetAxisRaw(horizontalInputAxis) : Input.GetAxis(horizontalInputAxis);
+    internal float moveInputY => useRawInput ? Input.GetAxisRaw(verticalInputAxis) : Input.GetAxis(verticalInputAxis);
 
-    internal bool rotateCamClockwise;
-    internal bool rotateCamCounterClockwise;
+    internal bool jump => Input.GetKeyDown(jumpKey);
+
+    internal bool splitMerge => Input.GetKeyDown(splitMergeKey);
+    internal bool swapSoul => Input.GetKeyDown(swapSoulKey);
+
+    internal bool rotateCamClockwise => Input.GetKeyDown(rotateClockwiseKey);
+    internal bool rotateCamCounterClockwise => Input.GetKeyDown(rotateCounterClockwiseKey);
 
     internal Player.SplitState split;
 
@@ -57,59 +63,20 @@ public class Player_Input : MonoBehaviour
         print("Player_Input Script Starting");
     }
 
-    // Update is called once per frame
-    void Update()
+    public int GetPressedNumber()
     {
-        //This is a Ternary Operation that chooses a message based if the selected Key is Being Pressed
-        //isLeftPressed = Input.GetKey(KeyCode.A) ? true : false;
-        //isRightPressed = Input.GetKey(KeyCode.D) ? true : false;
-
-        if (playerScript.activePlayer)
+        for (int number = 1; number <= 3; number++)
         {
-            moveInputX = Input.GetAxisRaw(horizontalInputAxis.ToString());                                  //
-            moveInputY = Input.GetAxisRaw(verticalInputAxis.ToString());                                    //
-
-            jump = Input.GetKeyDown(jumpKey);                                                  //
-
-            rotateCamClockwise = Input.GetKeyDown(rotateClockwiseKey);                           //
-            rotateCamCounterClockwise = Input.GetKeyDown(rotateCounterClockwiseKey);             // 
-
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                split = Player.SplitState.Quarter;
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                split = Player.SplitState.Half;
-            }
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                split = Player.SplitState.ThreeFourths;
-            }
-            else
-            {
-                split = Player.SplitState.None;
-            }
-
-            combine = Input.GetKeyDown(KeyCode.C);
+            if (Input.GetKeyDown(number.ToString()))
+                return number;
         }
-        else
-        {
-            split = Player.SplitState.None;
-            moveInputX = 0;
-            moveInputY = 0;
-            combine = false;
-            jump = false;
-            rotateCamClockwise = false;
-            rotateCamCounterClockwise = false;
-        }
+
+        return -1;
     }
 
-    public float GetHorizontalMovementInput()
+    public enum SplitBy
     {
-        if (useRawInput)
-            return Input.GetAxisRaw(horizontalInputAxis);
-        else
-            return Input.GetAxis(horizontalInputAxis);
+        Min,
+        Max
     }
 }

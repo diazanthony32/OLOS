@@ -5,71 +5,109 @@ public class Player_Split : MonoBehaviour
 {
     [SerializeField] internal Player playerScript;
 
-    [Space(5)]
+    [Header("Split Options: ")]
+    [Tooltip("How close should the player be in order to merge with a idle soul")]          // merge radius
     [SerializeField] internal float mergeDetectionRadius = 1.0f;
+
+    [Tooltip("The offset of the player's center for merge checks")]                         // player center offset
+    [SerializeField] internal Vector3 playerCenterOffest;
+
+
+    /*
+     Note:
+        Will make soul nearby update every frame so the player will have a visual indication on the incative soul about their merge range
+        Probably similar to the grounded code in movement 
+     */
 
     // Update is called once per frame
     void Update()
     {
-        // If the player selected a split option
-        if (playerScript.inputScript.split != Player.SplitState.None)
+        // if this is not the actively controlled player, ignore everything
+        if (!playerScript.activePlayer) return;
+
+        // Player pressed the split merge key
+        if (playerScript.inputScript.splitMerge)
         {
-            if (playerScript.splitState > playerScript.inputScript.split)
+            // player is using auto split merge, the game will determine on whether to split or merge depending on the players relative position to other souls
+            if (playerScript.inputScript.useAutoSplitMerge)
             {
-                List<Vector3> safeList = FindSafeAreasToSplit();
-
-                if (safeList != null)
+                Player soulNearby = GetNearestPlayerBody();
+                if (soulNearby != null)
                 {
-                    // sets current player to inactive and disables player control
-                    //this.playerScript.activePlayer = false;
+                    //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
                     this.playerScript.SetActivePlayer(false, 0.0f);
-                    this.playerScript.inputScript.moveInputX = 0;
-                    this.playerScript.inputScript.moveInputY = 0;
-                    this.playerScript.rb.velocity = Vector3.zero;
+                    CombinePlayers(this.playerScript, soulNearby);
+                    soulNearby.SetActivePlayer();
+                }
+                // if there are no nearby souls, the player is then split by the player's prefered method as long as the player has enough soul
+                else
+                {
+                    if (playerScript.splitState > Player.SplitState.Quarter)
+                    {
+                        List<Vector3> safeAreaList = FindSafeAreasToSplit();
 
-                    Player newPlayer = SplitPlayer(this.playerScript.inputScript.split, safeList);
+                        if (safeAreaList != null)
+                        {
+                            // disables current active player from moving
+                            playerScript.SetActivePlayer(false, 0.0f);
+
+                            // gets the split by amount from the players settings
+                            Player.SplitState splitBy = default;
+                            if (playerScript.inputScript.splitBy == Player_Input.SplitBy.Min)
+                                splitBy = Player.SplitState.Quarter;
+                            else if (playerScript.inputScript.splitBy == Player_Input.SplitBy.Max)
+                                splitBy = (Player.SplitState)(playerScript.splitState - Player.SplitState.Quarter);
+
+                            // splits by player's preference amount
+                            SplitPlayer(splitBy, safeAreaList);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Not enough soul to split...");
+                    }
+                }
+            }
+            // player is using manual controls (splitMerge is the merge button)
+            else
+            {
+                Player soulNearby = GetNearestPlayerBody();
+                if (soulNearby != null)
+                {
+                    //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
+                    this.playerScript.SetActivePlayer(false, 0.0f);
+                    CombinePlayers(this.playerScript, soulNearby);
+                    soulNearby.SetActivePlayer();
                 }
                 else
                 {
-                    Debug.LogWarning("No safe spots found to split to...");
+                    Debug.LogWarning("Not souls nearby to merge...");
                 }
             }
-            else
-            {
-                Debug.LogWarning("Not enough life to Split...");
-            }
-
-            playerScript.inputScript.split = Player.SplitState.None;
         }
-
-        // If the player wants to combine
-        else if (playerScript.inputScript.combine != false)
+        else
         {
-            playerScript.inputScript.combine = false;
-
-            // Grabs the nearest idle player
-            Player idlePlayer = GetNearestPlayerBody();
-
-            if (idlePlayer != null)
+            // only checks number inputs if autoSplitMerge is not enabled
+            if (!playerScript.inputScript.useAutoSplitMerge)
             {
-                // sets current player to inactive and disables player control
-                //this.playerScript.activePlayer = false;
-                this.playerScript.SetActivePlayer(false, 0.0f);
+                Player.SplitState splitBy = (Player.SplitState)playerScript.inputScript.GetPressedNumber();
 
-                CombinePlayers(this.playerScript, idlePlayer);
+                if ((splitBy > 0) && (splitBy < playerScript.splitState))
+                {
+                    List<Vector3> safeAreaList = FindSafeAreasToSplit();
 
-                // set the idle player active after everything is handled
-                //idlePlayer.activePlayer = true;
-                idlePlayer.SetActivePlayer();
-            }
-            else
-            {
-                Debug.LogWarning("No Nearby Bodies to Combine...");
+                    if (safeAreaList != null)
+                    {
+                        // disables current player from moving
+                        playerScript.SetActivePlayer(false, 0.0f);
+
+                        // splits here by that amount
+                        SplitPlayer(splitBy, safeAreaList);
+                    }
+                }
             }
         }
     }
-
-    // GENERAL FUNCTIONS ---------------------------------------------------------------------------------------------------
 
     // this will give us the list of sprites that are currently active on the player;
     List<int> GetActiveSpriteList(Player player)
@@ -86,8 +124,6 @@ public class Player_Split : MonoBehaviour
 
         return enabledSprites;
     }
-
-    // SPLITTING PLAYER ---------------------------------------------------------------------------------------------------
 
     Player SplitPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
@@ -147,11 +183,6 @@ public class Player_Split : MonoBehaviour
         });
 
         return newPlayer;
-    }
-
-    void SplitComplete(Player player)
-    {
-
     }
 
     void SplitPlayerSprites(Player player, Player newPlayer)
@@ -221,15 +252,13 @@ public class Player_Split : MonoBehaviour
         return safeSpawns;
     }
 
-    // COMBINING PLAYERS  ---------------------------------------------------------------------------------------------------
-
     Player GetNearestPlayerBody()
     {
         // Grabbing the nearest idle player body 
-        Collider[] hitColliders = Physics.OverlapSphere(this.playerScript.transform.position, mergeDetectionRadius);
+        Collider[] hitColliders = Physics.OverlapSphere(playerScript.transform.position + playerCenterOffest, mergeDetectionRadius);
         foreach (Collider collider in hitColliders)
         {
-            if (collider.CompareTag("Shadow") && (collider.transform != this.playerScript.transform))
+            if (collider.CompareTag("Shadow") && (collider.transform != playerScript.transform))
             {
                 return collider.GetComponent<Player>();
             }
@@ -279,6 +308,9 @@ public class Player_Split : MonoBehaviour
             Gizmos.DrawSphere(safeSpot, 0.25f);
         }
 
+        // for merge detection
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position + playerCenterOffest, mergeDetectionRadius);
     }
 
 }

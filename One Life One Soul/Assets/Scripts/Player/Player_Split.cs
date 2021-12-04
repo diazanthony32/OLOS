@@ -41,7 +41,7 @@ public class Player_Split : MonoBehaviour
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
                     this.playerScript.SetActivePlayer(false, 0.0f);
                     CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
-                    soulColliders[0].GetComponent<Player>().SetActivePlayer();
+                    soulColliders[0].GetComponent<Player>().SetActivePlayer(true, 0.0f);
                 }
                 // if there are no nearby souls, the player is then split by the player's prefered method as long as the player has enough soul
                 else
@@ -54,6 +54,7 @@ public class Player_Split : MonoBehaviour
                         {
                             // disables current active player from moving
                             playerScript.SetActivePlayer(false, 0.0f);
+                            playerScript.rb.velocity = Vector3.zero;
 
                             // gets the split by amount from the players settings
                             Player.SplitState splitBy = default;
@@ -80,7 +81,7 @@ public class Player_Split : MonoBehaviour
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
                     playerScript.SetActivePlayer(false, 0.0f);
                     CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
-                    soulColliders[0].GetComponent<Player>().SetActivePlayer();
+                    soulColliders[0].GetComponent<Player>().SetActivePlayer(true, 0.0f);
                 }
                 else
                 {
@@ -103,6 +104,7 @@ public class Player_Split : MonoBehaviour
                     {
                         // disables current player from moving
                         playerScript.SetActivePlayer(false, 0.0f);
+                        playerScript.rb.velocity = Vector3.zero;
 
                         // splits here by that amount
                         SplitPlayer(splitBy, safeAreaList);

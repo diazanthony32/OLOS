@@ -7,8 +7,11 @@ public class CameraController : MonoBehaviour
     [Tooltip("")]
     [Space(5)]
     [SerializeField] internal float rotationDegrees;
-    [SerializeField] internal float rotationCooldown;
-    internal float mayRotate = 0.0f;
+    [SerializeField] internal float rotationSpeed;
+
+    [SerializeField] internal AnimationCurve rotationCurve;
+
+    internal float rotateCooldown = 0.0f;
 
     internal CinemachineVirtualCamera _CMVCamera;
     internal Player _currentPlayerScript;
@@ -22,17 +25,13 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ((_currentPlayerScript.inputScript.rotateCamClockwise || _currentPlayerScript.inputScript.rotateCamCounterClockwise) && mayRotate < 0.0f)
+        if ((_currentPlayerScript.inputScript.rotateCamClockwise || _currentPlayerScript.inputScript.rotateCamCounterClockwise) && rotateCooldown < 0.0f)
         {
-            mayRotate = rotationCooldown;
+            rotateCooldown = rotationSpeed;
             RotateCam();
         }
 
-        // Used for Coyote Time 
-        mayRotate -= Time.deltaTime;
-
-        //transform.localRotation;
-        //Debug.Log(transform.localRotation);
+        rotateCooldown -= Time.deltaTime;
     }
 
     // Rotate Camera and Rotate any Enviroment Sprites
@@ -53,7 +52,7 @@ public class CameraController : MonoBehaviour
         }
 
         // To check out the different easing types, go to: https://easings.net/
-        LeanTween.rotate(_CMVCamera.gameObject, tempRot, rotationCooldown).setEaseInOutSine();
+        LeanTween.rotate(_CMVCamera.gameObject, tempRot, rotationSpeed).setEase(rotationCurve);
     }
 
     public void FollowTarget(Transform targetTransform)

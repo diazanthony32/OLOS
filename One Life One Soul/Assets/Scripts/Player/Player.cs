@@ -61,7 +61,13 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        OnCameraUpdate();
+        OutOfBoundsHandler();
+    }
+
+    void OutOfBoundsHandler()
+    {
+        if (transform.position.y < -50.0f)
+            transform.position = Vector3.zero;
     }
 
     internal void ChangeState(PlayerState newState)
@@ -95,18 +101,6 @@ public class Player : MonoBehaviour
         }
 
         Destroy(this.gameObject);
-    }
-
-    // Detects a camera angle perspective change and adjusts accordingly
-    void OnCameraUpdate()
-    {
-        if (this.transform.eulerAngles.y != cameraController.gameObject.transform.eulerAngles.y)
-        {
-            //Debug.Log("Player Rotation is not aligned to the camera");
-            Vector3 tempRot = this.transform.eulerAngles;
-            tempRot.y = cameraController.GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.transform.eulerAngles.y;
-            this.transform.eulerAngles = tempRot;
-        }
     }
 
     // Sets al the needed variables in order to control/disable a player with an optional delay

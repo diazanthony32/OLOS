@@ -2400,10 +2400,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 963194228}
+  - component: {fileID: 963194230}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
-  - component: {fileID: 963194230}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2523,7 +2523,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationDegrees: 90
-  rotationCooldown: 0.25
+  rotationSpeed: 0.6
+  rotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.6
+      value: 0.9
+      inSlope: 0.875
+      outSlope: 0.875
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &967417441
 GameObject:
   m_ObjectHideFlags: 0
@@ -5654,6 +5687,14 @@ PrefabInstance:
     - target: {fileID: 400246539942230161, guid: 1d67959377e714bb3ab59b74982ba845, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 400246539942230165, guid: 1d67959377e714bb3ab59b74982ba845, type: 3}
+      propertyPath: rotateClockwiseKey
+      value: 113
+      objectReference: {fileID: 0}
+    - target: {fileID: 400246539942230165, guid: 1d67959377e714bb3ab59b74982ba845, type: 3}
+      propertyPath: rotateCounterClockwiseKey
+      value: 101
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1d67959377e714bb3ab59b74982ba845, type: 3}

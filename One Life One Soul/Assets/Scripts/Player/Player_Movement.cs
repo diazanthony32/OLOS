@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class Player_Movement : MonoBehaviour
@@ -28,11 +29,18 @@ public class Player_Movement : MonoBehaviour
     [Tooltip("The force applied to the player when jumping")]                                                       // force applied to the player when jumping
     [SerializeField] internal float jumpForce = 10;
 
+    [Tooltip("The force applied to the player when jumping")]                                                       // force applied to the player when jumping
+    [SerializeField] internal float jumpDuration = 0.2f;
+
     [Tooltip("How many seconds of forgiveness should the player have for jumping to happen")]                       // jumping after leaving the ground forgiveness
     [SerializeField] internal float coyoteTimeForgiveness = 0.25f;
 
     [Tooltip("How many seconds of forgiveness should the player have for jumping to happen")]                       // jumping after leaving the ground forgiveness
     [SerializeField] internal float jumpBuffer = 0.25f;
+
+    //[SerializeField] private float fallMultiplier = 2.5f;
+    //[SerializeField] private float slowFallMultiplier = 2f;
+    //[SerializeField] private float fastFallMultiplier = 2f;
 
     [Tooltip("The layers the player should expect to be ground")]                                                   // how fast the player is allowed to move
     [SerializeField] internal LayerMask groundMask;
@@ -44,11 +52,17 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] internal float groundCheckRadius = 0.2f;
 
     private Collider[] groundColliders = new Collider[1];
-    private bool isGrounded => Physics.OverlapSphereNonAlloc(transform.position + groundCheckOffest, groundCheckRadius, groundColliders, groundMask, QueryTriggerInteraction.Ignore) > 0;
+    private bool isGrounded => Physics.OverlapSphereNonAlloc(transform.position + groundCheckOffest, groundCheckRadius, groundColliders, groundMask, QueryTriggerInteraction.Ignore) > 0 ;
 
     private float coyoteTimer;
     private float jumpBufferTimer;
+    private float jumpTimer;
+
     private bool mayJump;
+    private bool hasJumped;
+    private bool stopJump;
+
+    private JumpState jumpState;
 
     [Space(10)]
 
@@ -68,7 +82,7 @@ public class Player_Movement : MonoBehaviour
         if (!playerScript.activePlayer) return;
 
         SetPlayerOrientation();
-        DetermineMayJump();
+        HandleJump();
     }
 
     // Fixed Update is called once per Physics Update
@@ -89,9 +103,6 @@ public class Player_Movement : MonoBehaviour
         Vector3 _targetVelocity = _translateMoveVector * maxSpeed;
         _targetVelocity.y = playerScript.rb.velocity.y;
 
-        //if (mayJump)
-        //    _targetVelocity.y *= jumpForce;
-
         // gets the direction the Player is moving and adjusts the acceleration force when changing directions rapidly
         Vector3 _velocityNormalized = playerScript.rb.velocity.normalized;
         float _velocityDot = Vector3.Dot(_translateMoveVector, _velocityNormalized);
@@ -108,55 +119,118 @@ public class Player_Movement : MonoBehaviour
         playerScript.anim.SetFloat("Walking", (Mathf.Abs(playerScript.rb.velocity.x) + Mathf.Abs(playerScript.rb.velocity.z)));
 
         if (mayJump)
-            Jump();
+            StartJump();
     }
 
-
-    // may rewrite this to instead create an opposing force to apply rather than setting velocity to zero...
-    void Jump()
-    {
-        // resets the players y velocity
-        var temp = playerScript.rb.velocity;
-        temp.y = 0.0f;
-        playerScript.rb.velocity = temp;
-
-        playerScript.rb.AddForce(Vector3.up * jumpForce * playerScript.rb.mass, ForceMode.Impulse);
-        mayJump = false;
-
-        // resets the timers used for jumping buffering as well as coyote time
-        coyoteTimer = 0.0f;
-        jumpBufferTimer = 0.0f;
-    }
-
-    void DetermineMayJump()
+    void HandleJump()
     {
         //used for timing jump Buffering and for coyote time
         jumpBufferTimer -= Time.deltaTime;
         coyoteTimer -= Time.deltaTime;
+        jumpTimer -= Time.deltaTime;
 
-        // resets the timer for coyote time while grounded
+        // resets coyote timer to give some leniency if the player leaves the platform a tad too late
         if (isGrounded)
             coyoteTimer = coyoteTimeForgiveness;
 
-        // if the player presses jump, it checks if they are grounded. If so, player jumps next physics update
-        // of if the player is no longer grounded but just barely left the ground, the player is allowed to jump
-        // If not, jump is then buffered for a fraction of a second to allow for jump forgiveness
-        if (playerScript.inputScript.jump)
-        {
-            if (isGrounded || (coyoteTimer > 0.0f && !isGrounded))
-            {
-                mayJump = true;
-            }
-            else
-            {
+        // when the player presses jump, set that jump in the jump buffer 
+        if (playerScript.inputScript.jumpPressed)
                 jumpBufferTimer = jumpBuffer;
-            }
-        }
-        // if the jump buffer is still up and the player lands, the player jumps
-        else if ((jumpBufferTimer > 0.0f && isGrounded))
+
+        // if there is a jump in the jump buffer and the player was recently on the ground then begin the jump process
+        if (jumpBufferTimer > 0f && coyoteTimer > 0.0f && !hasJumped)
         {
             mayJump = true;
         }
+
+        if ((playerScript.inputScript.jumpReleased || jumpTimer < 0.0f) && playerScript.rb.velocity.y > 0f && !stopJump)
+        {
+            Debug.Log("Jump Action Ended...");
+
+            // if the player let go of the jump early
+            if (playerScript.inputScript.jumpReleased && playerScript.rb.velocity.y > 0)
+            {
+
+            }
+            // if the player holds throughout the entire jump
+            else if (playerScript.inputScript.jumpHeld && playerScript.rb.velocity.y > 0)
+            {
+
+            }
+
+            EndJump();
+        }
+
+        //return;
+
+        ////---------------------------------------------------
+        //// Player holds Jump For the entire duration of the Jump
+        //// ideally this should be the farthest you can jump
+        //if (playerScript.rb.velocity.y > 0 && playerScript.inputScript.jumpPressed)
+        //{
+        //    //Debug.Log("Player held jump all through the jump");
+        //}
+        //// Player is jumping but lets go of Jump
+        //// ideally the player should descent pretty rapidly
+        //else if (playerScript.rb.velocity.y > 0 && !playerScript.inputScript.jumpPressed)
+        //{
+        //    //Debug.Log("Player let go of jump midway of jumping");
+        //}
+        //// Player is falling and is holding Jump
+        //// ideally the player should still land fast but not as fast as letting go comepletely
+        //else if (playerScript.rb.velocity.y < 0 && playerScript.inputScript.jumpPressed)
+        //{
+        //    //Debug.Log("Player is falling while holding jump");
+        //}
+        //// Player is falling and lets go of Jump
+        //// ideally the player should descent pretty rapidly
+        //else if (playerScript.rb.velocity.y < 0 && !playerScript.inputScript.jumpPressed)
+        //{
+        //    //Debug.Log("Player is falling");
+        //}
+    }
+
+    void StartJump()
+    {
+        Debug.LogWarning("begin jump");
+
+        // setup for variable jumping
+        jumpState = JumpState.Rising;
+
+        // will fix eventually
+        var temp = playerScript.rb.velocity;
+        temp.y = 0;
+        playerScript.rb.velocity = temp;
+
+        // resets the timers used for jumping buffering as well as coyote time
+        coyoteTimer = -10.0f;
+        jumpBufferTimer = -10.0f;
+
+        //starts the jump timer
+        jumpTimer = jumpDuration;
+        mayJump = false;
+
+        stopJump = false;
+
+        //ADD GRAVITY SCALE HERE
+        playerScript.rb.useGravity = false;
+
+        // adds a force to the player in the up direction
+        playerScript.rb.AddForce(Vector3.up * jumpForce * playerScript.rb.mass, ForceMode.Impulse);
+        StartCoroutine(JumpCooldown());
+    }
+
+    void EndJump()
+    {
+        Debug.LogWarning("stopped jump");
+
+        jumpState = JumpState.Falling;
+
+        coyoteTimer = -10.0f;
+
+        playerScript.rb.useGravity = true;
+
+        stopJump = true;
     }
 
     void CheckStepHeight()
@@ -181,6 +255,20 @@ public class Player_Movement : MonoBehaviour
             transform.localScale = flippedScale;
         }
 
+    }
+
+    private IEnumerator JumpCooldown()
+    {
+        hasJumped = true;
+        yield return new WaitForSeconds(0.4f);
+        hasJumped = false;
+    }
+
+    public enum JumpState
+    {
+        Grounded,
+        Falling,
+        Rising
     }
 
     private void OnDrawGizmos()

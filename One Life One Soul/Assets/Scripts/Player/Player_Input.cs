@@ -40,22 +40,19 @@ public class Player_Input : MonoBehaviour
     [Tooltip("Input to rotate the player's camera counter-clockwise")]                                          // Key for rotating camera counter-clockwise
     [SerializeField] private KeyCode rotateCounterClockwiseKey = KeyCode.E;
 
-
-    // what other scripts will have access to
     internal float moveInputX => useRawInput ? Input.GetAxisRaw(horizontalInputAxis) : Input.GetAxis(horizontalInputAxis);
     internal float moveInputY => useRawInput ? Input.GetAxisRaw(verticalInputAxis) : Input.GetAxis(verticalInputAxis);
 
-    internal bool jump => Input.GetKeyDown(jumpKey);
+    //Jump key variables;
+    internal bool jumpPressed => Input.GetKeyDown(jumpKey);
+    internal bool jumpReleased => Input.GetKeyUp(jumpKey);
+    internal bool jumpHeld => Input.GetKey(jumpKey);
 
     internal bool splitMerge => Input.GetKeyDown(splitMergeKey);
     internal bool swapSoul => Input.GetKeyDown(swapSoulKey);
 
     internal bool rotateCamClockwise => Input.GetKeyDown(rotateClockwiseKey);
     internal bool rotateCamCounterClockwise => Input.GetKeyDown(rotateCounterClockwiseKey);
-
-    internal Player.SplitState split;
-
-    internal bool combine;
 
     // Start is called before the first frame update
     void Start()

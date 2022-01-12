@@ -15,6 +15,8 @@ public class Player : MonoBehaviour
     [SerializeField] internal Player_Movement movementScript;
     [SerializeField] internal Player_Collision collisionScript;
     [SerializeField] internal Player_Split splitScript;
+    [SerializeField] internal Player_SpriteManager spriteManager;
+
 
     internal CameraController cameraController;
 
@@ -22,10 +24,6 @@ public class Player : MonoBehaviour
     [Space(5)]
     [SerializeField] internal SplitState splitState = SplitState.Full;
     [SerializeField] internal PlayerState playerState = PlayerState.Idle;
-
-    [Header("Body SpriteRenderers: ")]
-    [Space(5)]
-    [SerializeField] internal SpriteRenderer[] spriteRenderers;
 
     //component references
     internal Animator anim;
@@ -38,12 +36,6 @@ public class Player : MonoBehaviour
         print("Main Player Script Awake");
         anim = GetComponentInChildren<Animator>();
         rb = GetComponentInChildren<Rigidbody>();
-
-        foreach (Renderer renderer in spriteRenderers)
-        {
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-            renderer.receiveShadows = true;
-        }
     }
 
     // Start is called before the first frame update
@@ -55,7 +47,7 @@ public class Player : MonoBehaviour
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         gameManager.playerlist.Add(this);
 
-        SetActivePlayer();
+        SetActive();
     }
 
     // Update is called once per frame
@@ -97,14 +89,14 @@ public class Player : MonoBehaviour
         if (gameManager.playerlist.Count > 0)
         {
             cameraController.FollowTarget(gameManager.playerlist[gameManager.playerlist.Count - 1].transform);
-            gameManager.playerlist[gameManager.playerlist.Count - 1].SetActivePlayer();
+            gameManager.playerlist[gameManager.playerlist.Count - 1].SetActive();
         }
 
         Destroy(this.gameObject);
     }
 
     // Sets al the needed variables in order to control/disable a player with an optional delay
-    public void SetActivePlayer(bool state = true, float delay = 1.0f)
+    public void SetActive(bool state = true, float delay = 1.0f)
     {
         if (state)
         {

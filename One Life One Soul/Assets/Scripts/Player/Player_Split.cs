@@ -3,26 +3,36 @@ using UnityEngine;
 
 public class Player_Split : MonoBehaviour
 {
+
     [SerializeField] internal Player playerScript;
 
     [Header("Split Options: ")]
-    [Tooltip("How close should the player be in order to merge with a idle soul")]          // merge radius
+    [Tooltip("What Splitting will spawn in")]
+    [SerializeField] internal GameObject playerPrefab;
+
+    [Tooltip("How many Spots should the Player check before splitting")]
+    [SerializeField] internal int raysToShoot = 8;
+
+    [Tooltip("How Far Should the Player split from the origin")]
+    [SerializeField] internal float raylength = 1.5f;
+
+
+    [Header("Merge Options: ")]
+    [Tooltip("How close should the player be in order to merge with a idle soul")]
     [SerializeField] internal float mergeDetectionRadius = 1.0f;
 
-    [Tooltip("The offset of the player's center for merge checks")]                         // player center offset
+    [Tooltip("The offset of the player's center for merge checks")]
     [SerializeField] internal Vector3 playerCenterOffest;
 
-    [Tooltip("The offset of the player's center for merge checks")]                         // player center offset
+    [Tooltip("The offset of the player's center for merge checks")]
     [SerializeField] internal LayerMask soulMask;
 
+    [Tooltip("Option to Highlight the current Merge Target")]
+    [SerializeField] internal bool highlightMergeTarget = true;
+
+    // used for detecting if a soul is nearby
     private Collider[] soulColliders = new Collider[1];
     private bool soulNearby => Physics.OverlapSphereNonAlloc(transform.position + playerCenterOffest, mergeDetectionRadius, soulColliders, soulMask, QueryTriggerInteraction.Ignore) > 0;
-
-    /*
-     Note:
-        Will make soul nearby update every frame so the player will have a visual indication on the incative soul about their merge range
-        Probably similar to the grounded code in movement 
-     */
 
     // Update is called once per frame
     void Update()
@@ -30,22 +40,25 @@ public class Player_Split : MonoBehaviour
         // if this is not the actively controlled player, ignore everything
         if (!playerScript.activePlayer) return;
 
-        // Player pressed the split merge key
-        if (playerScript.inputScript.splitMerge)
+        // checks if PLAYER is using the autoSplitMerge setting
+        if (playerScript.inputScript.useAutoSplitMerge)
         {
-            // player is using auto split merge, the game will determine on whether to split or merge depending on the players relative position to other souls
-            if (playerScript.inputScript.useAutoSplitMerge)
+            // if the player pressed the assigned split/merge key, the game will determine on whether to split or merge depending on the players relative position to other souls
+            if (playerScript.inputScript.splitMerge)
             {
                 if (soulNearby)
                 {
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
-                    this.playerScript.SetActivePlayer(false, 0.0f);
+                    playerScript.SetActive(false, 0.0f);
+
                     CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
-                    soulColliders[0].GetComponent<Player>().SetActivePlayer(true, 0.0f);
+                    soulColliders[0].GetComponent<Player>().SetActive(true, 0.0f);
                 }
+
                 // if there are no nearby souls, the player is then split by the player's prefered method as long as the player has enough soul
                 else
                 {
+
                     if (playerScript.splitState > Player.SplitState.Quarter)
                     {
                         List<Vector3> safeAreaList = FindSafeAreasToSplit();
@@ -53,7 +66,7 @@ public class Player_Split : MonoBehaviour
                         if (safeAreaList != null)
                         {
                             // disables current active player from moving
-                            playerScript.SetActivePlayer(false, 0.0f);
+                            playerScript.SetActive(false, 0.0f);
                             playerScript.rb.velocity = Vector3.zero;
 
                             // gets the split by amount from the players settings
@@ -67,32 +80,34 @@ public class Player_Split : MonoBehaviour
                             SplitPlayer(splitBy, safeAreaList);
                         }
                     }
+
                     else
                     {
                         Debug.LogWarning("Not enough soul to split...");
                     }
                 }
             }
-            // player is using manual controls (splitMerge is the merge button)
-            else
+        }
+
+        // if the PLAYER is not using the autoSplitMerge setting, manual Controls are enabled
+        else if (!playerScript.inputScript.useAutoSplitMerge)
+        {
+            if (playerScript.inputScript.splitMerge)
             {
                 if (soulNearby)
                 {
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
-                    playerScript.SetActivePlayer(false, 0.0f);
+                    playerScript.SetActive(false, 0.0f);
+
                     CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
-                    soulColliders[0].GetComponent<Player>().SetActivePlayer(true, 0.0f);
+                    soulColliders[0].GetComponent<Player>().SetActive(true, 0.0f);
                 }
                 else
                 {
                     Debug.LogWarning("Not souls nearby to merge...");
                 }
             }
-        }
-        else
-        {
-            // only checks number inputs if autoSplitMerge is not enabled
-            if (!playerScript.inputScript.useAutoSplitMerge)
+            else
             {
                 Player.SplitState splitBy = (Player.SplitState)playerScript.inputScript.GetPressedNumber();
 
@@ -103,7 +118,7 @@ public class Player_Split : MonoBehaviour
                     if (safeAreaList != null)
                     {
                         // disables current player from moving
-                        playerScript.SetActivePlayer(false, 0.0f);
+                        playerScript.SetActive(false, 0.0f);
                         playerScript.rb.velocity = Vector3.zero;
 
                         // splits here by that amount
@@ -114,22 +129,7 @@ public class Player_Split : MonoBehaviour
         }
     }
 
-    // this will give us the list of sprites that are currently active on the player;
-    List<int> GetActiveSpriteList(Player player)
-    {
-        List<int> enabledSprites = new List<int>();
-        for (int i = player.spriteRenderers.Length - 1; i > 1; i--)
-        {
-            //Debug.Log(i);
-            if (player.spriteRenderers[i].enabled)
-            {
-                enabledSprites.Add(i);
-            }
-        }
-
-        return enabledSprites;
-    }
-
+    // Called when the player is splitting
     Player SplitPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
         gameObject.layer = LayerMask.NameToLayer("Soul");
@@ -141,7 +141,8 @@ public class Player_Split : MonoBehaviour
         this.playerScript.splitState -= splitHealth;
 
         // Disable active sprites from the current player to activate on the new player according to the health value
-        SplitPlayerSprites(this.playerScript, newPlayer);
+        //SplitPlayerSprites(this.playerScript, newPlayer);
+        SplitMergePlayerSprites("split", playerScript, newPlayer);
 
         //this.playerScript.playerCam.Follow = newPlayer.transform;
 
@@ -156,9 +157,8 @@ public class Player_Split : MonoBehaviour
 
         // creation of the new player and setting its splitState to the split value
         // init spawn is to make sure the spawned player is behind the current player
-        Vector3 initSpawn = this.playerScript.transform.position + (this.playerScript.transform.forward * 0.01f);
-        Player newPlayer = Instantiate(Resources.Load("Prefabs/Player/Player") as GameObject, initSpawn, this.playerScript.transform.rotation, null).GetComponent<Player>();
-        newPlayer.gameObject.name = newPlayer.gameObject.name + " " + (this.playerScript.gameManager.playerlist.Count + 1);
+        Vector3 initSpawn = this.playerScript.transform.position + (this.playerScript.transform.forward * -0.001f);
+        Player newPlayer = Instantiate(playerPrefab, initSpawn, this.playerScript.transform.rotation, null).GetComponent<Player>();
 
         // maintain the players facing direction when splitting
         newPlayer.transform.localScale = this.playerScript.transform.localScale;
@@ -170,39 +170,16 @@ public class Player_Split : MonoBehaviour
         // ignore collision of the players durring the split animation
         Physics.IgnoreCollision(this.playerScript.GetComponent<Collider>(), newPlayer.GetComponent<Collider>(), true);
 
-        // sets all sprites to false except for the shadow and eyes
-        foreach (SpriteRenderer sprite in newPlayer.spriteRenderers)
-        {
-            sprite.enabled = false;
-        }
-        newPlayer.spriteRenderers[0].enabled = true;
-        newPlayer.spriteRenderers[1].enabled = true;
         newPlayer.splitState = splitHealth;
 
         // triggers the split animation as well as the direction the player moves towards
         newPlayer.anim.SetTrigger("Split");
         LeanTween.move(newPlayer.gameObject, spawnLocation, 0.4f).setDelay(0.6f).setOnComplete(() =>
         {
-            //newPlayer.SetActivePlayer(true);
             Physics.IgnoreCollision(this.playerScript.GetComponent<Collider>(), newPlayer.GetComponent<Collider>(), false);
         });
 
         return newPlayer;
-    }
-
-    void SplitPlayerSprites(Player player, Player newPlayer)
-    {
-        List<int> enabledSprites = GetActiveSpriteList(player);
-
-        for (int y = 0; y < enabledSprites.Count; y++)
-        {
-            if (((int)newPlayer.splitState) > y)
-            {
-                player.spriteRenderers[enabledSprites[y]].enabled = false;
-                newPlayer.spriteRenderers[enabledSprites[y]].enabled = true;
-
-            }
-        }
     }
 
     // Base Code from a comment at https://www.reddit.com/r/Unity3D/comments/31pcxh/how_to_check_distance_from_player_to_object_in/
@@ -210,9 +187,6 @@ public class Player_Split : MonoBehaviour
     List<Vector3> FindSafeAreasToSplit()
     {
         List<Vector3> safeSpawns = new List<Vector3>();
-
-        int raysToShoot = 8;
-        float raylength = 2.25f;
 
         RaycastHit hit;
         for (int i = 0; i < raysToShoot; i++)
@@ -257,28 +231,13 @@ public class Player_Split : MonoBehaviour
         return safeSpawns;
     }
 
-    //Player GetNearestPlayerBody()
-    //{
-    //    // Grabbing the nearest idle player body 
-    //    Collider[] hitColliders = Physics.OverlapSphere(playerScript.transform.position + playerCenterOffest, mergeDetectionRadius);
-    //    foreach (Collider collider in hitColliders)
-    //    {
-    //        if (collider.CompareTag("Shadow") && (collider.transform != playerScript.transform))
-    //        {
-    //            return collider.GetComponent<Player>();
-    //        }
-    //    }
-
-    //    return null;
-    //}
-
     void CombinePlayers(Player player, Player idlePlayer)
     {
         // adds the health to the idle player and removes it from the active one
         idlePlayer.splitState += ((int)player.splitState);
         player.splitState = Player.SplitState.None;
 
-        CombinePlayerSprites(player, idlePlayer);
+        SplitMergePlayerSprites("merge", idlePlayer, player);
 
         //player.playerCam.Follow = idlePlayer.transform;
 
@@ -289,14 +248,35 @@ public class Player_Split : MonoBehaviour
         //idlePlayer.tag = "Player";
     }
 
-    void CombinePlayerSprites(Player player, Player idlePlayer)
+    void SplitMergePlayerSprites(string method, Player master, Player slave)
     {
-        // Adds the active Sprites on the active player to the idle one
-        List<int> enabledSprites = GetActiveSpriteList(player);
-        for (int y = 0; y < enabledSprites.Count; y++)
+        if (method == "split")
         {
-            player.spriteRenderers[enabledSprites[y]].enabled = false;
-            idlePlayer.spriteRenderers[enabledSprites[y]].enabled = true;
+            // set the newly created player to have no visible life sprites
+            foreach (int i in slave.spriteManager.GetActiveRendererArrays())
+            {
+                slave.spriteManager.SetSprites(slave.spriteManager.spriteRenderers[i], false);
+            }
+
+            // swaps the active sprites from the old player to the new player
+            foreach (int i in master.spriteManager.GetActiveRendererArrays())
+            {
+                if ((int)slave.splitState > i)
+                {
+                    master.spriteManager.SetSprites(master.spriteManager.spriteRenderers[i], false);
+                    slave.spriteManager.SetSprites(slave.spriteManager.spriteRenderers[i], true);
+                }
+            }
+        }
+
+        // activates all the active life sprites from the current player to the new player
+        else if(method == "merge")
+        {
+            foreach (int i in slave.spriteManager.GetActiveRendererArrays())
+            {
+                master.spriteManager.SetSprites(master.spriteManager.spriteRenderers[i], true);
+                slave.spriteManager.SetSprites(slave.spriteManager.spriteRenderers[i], false);
+            }
         }
     }
 

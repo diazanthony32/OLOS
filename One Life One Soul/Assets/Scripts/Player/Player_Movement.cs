@@ -62,7 +62,7 @@ public class Player_Movement : MonoBehaviour
     private bool hasJumped;
     private bool stopJump;
 
-    private JumpState jumpState;
+    //private JumpState jumpState;
 
     [Space(10)]
 
@@ -147,16 +147,16 @@ public class Player_Movement : MonoBehaviour
         {
             Debug.Log("Jump Action Ended...");
 
-            // if the player let go of the jump early
-            if (playerScript.inputScript.jumpReleased && playerScript.rb.velocity.y > 0)
-            {
+            //// if the player let go of the jump early
+            //if (playerScript.inputScript.jumpReleased && playerScript.rb.velocity.y > 0)
+            //{
 
-            }
-            // if the player holds throughout the entire jump
-            else if (playerScript.inputScript.jumpHeld && playerScript.rb.velocity.y > 0)
-            {
+            //}
+            //// if the player holds throughout the entire jump
+            //else if (playerScript.inputScript.jumpHeld && playerScript.rb.velocity.y > 0)
+            //{
 
-            }
+            //}
 
             EndJump();
         }
@@ -195,7 +195,7 @@ public class Player_Movement : MonoBehaviour
         Debug.LogWarning("begin jump");
 
         // setup for variable jumping
-        jumpState = JumpState.Rising;
+        //jumpState = JumpState.Rising;
 
         // will fix eventually
         var temp = playerScript.rb.velocity;
@@ -224,7 +224,7 @@ public class Player_Movement : MonoBehaviour
     {
         Debug.LogWarning("stopped jump");
 
-        jumpState = JumpState.Falling;
+        //jumpState = JumpState.Falling;
 
         coyoteTimer = -10.0f;
 

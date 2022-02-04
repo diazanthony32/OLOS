@@ -71,7 +71,7 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private float flipDeadzone = 0.1f;
     internal bool facingRight = true;
 
-    void Start()
+    void Awake()
     {
         print("Player_Movement Script Starting");
         playerScript.rb.velocity = new Vector3(0, 0, 0);

@@ -10,16 +10,34 @@ public class Player_Collision : MonoBehaviour
     internal CapsuleCollider _playerCollider;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         print("Player_Collision Script Starting");
-
         _playerCollider = GetComponent<CapsuleCollider>();
     }
 
-    // Update is called once per frame
-    void Update()
+    // 
+    private void OnCollisionEnter(Collision collision)
     {
         
     }
+
+    // 
+    private void OnCollisionStay(Collision collision)
+    {
+        
+    }
+
+    // 
+    private void OnCollisionExit(Collision collision)
+    {
+        
+    }
+
+    // 
+    private void OnParticleCollision(GameObject other)
+    {
+        
+    }
+
 }

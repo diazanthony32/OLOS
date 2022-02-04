@@ -19,7 +19,8 @@ public class CameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _CMVCamera = GetComponent<CinemachineBrain>().OutputCamera.GetComponent<CinemachineVirtualCamera>();
+        //_CMVCamera = GetComponent<CinemachineBrain>().ActiveVirtualCamera.VirtualCameraGameObject.GetComponent<CinemachineVirtualCamera>();
+        _CMVCamera = FindObjectOfType<CinemachineVirtualCamera>();
     }
 
     // Update is called once per frame
@@ -57,7 +58,7 @@ public class CameraController : MonoBehaviour
 
     public void FollowTarget(Transform targetTransform)
     {
-        Debug.Log(GetComponent<CinemachineBrain>().OutputCamera.name);
+        //Debug.Log(GetComponent<CinemachineBrain>().OutputCamera.name);
         _CMVCamera.Follow = targetTransform;
     }
 

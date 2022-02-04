@@ -55,7 +55,7 @@ public class Player_Input : MonoBehaviour
     internal bool rotateCamCounterClockwise => Input.GetKeyDown(rotateCounterClockwiseKey);
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         print("Player_Input Script Starting");
     }

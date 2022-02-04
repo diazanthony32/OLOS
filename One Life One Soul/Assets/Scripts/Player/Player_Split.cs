@@ -7,6 +7,12 @@ public class Player_Split : MonoBehaviour
     [SerializeField] internal Player playerScript;
 
     [Header("Split Options: ")]
+    [Tooltip("Option to Highlight the current Merge Target")]
+    [SerializeField] internal PhysicMaterial frictionlessMaterial;
+    [Tooltip("Option to Highlight the current Merge Target")]
+    [SerializeField] internal PhysicMaterial idleMaterial;
+
+    [Header("Split Options: ")]
     [Tooltip("What Splitting will spawn in")]
     [SerializeField] internal GameObject playerPrefab;
 
@@ -32,33 +38,35 @@ public class Player_Split : MonoBehaviour
 
     // used for detecting if a soul is nearby
     private Collider[] soulColliders = new Collider[1];
-    private bool soulNearby => Physics.OverlapSphereNonAlloc(transform.position + playerCenterOffest, mergeDetectionRadius, soulColliders, soulMask, QueryTriggerInteraction.Ignore) > 0;
+    private bool soulNearby => Physics.OverlapSphereNonAlloc(this.transform.position + playerCenterOffest, mergeDetectionRadius, soulColliders, soulMask, QueryTriggerInteraction.Ignore) > 0;
 
     // Update is called once per frame
     void Update()
     {
         // if this is not the actively controlled player, ignore everything
-        if (!playerScript.activePlayer) return;
+        if (!this.playerScript.activePlayer) return;
 
         // checks if PLAYER is using the autoSplitMerge setting
-        if (playerScript.inputScript.useAutoSplitMerge)
+        if (this.playerScript.inputScript.useAutoSplitMerge)
         {
             // if the player pressed the assigned split/merge key, the game will determine on whether to split or merge depending on the players relative position to other souls
-            if (playerScript.inputScript.splitMerge)
+            if (this.playerScript.inputScript.splitMerge)
             {
                 if (soulNearby)
                 {
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
-                    playerScript.SetActive(false, 0.0f);
+                    this.playerScript.SetActive(false, 0.0f);
+                    this.playerScript.rb.velocity = Vector3.zero;
+                    this.playerScript.collisionScript._playerCollider.material = idleMaterial;
 
-                    CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
-                    soulColliders[0].GetComponent<Player>().SetActive(true, 0.0f);
+                    CombinePlayers(this.playerScript, soulColliders[0].GetComponent<Player>());
+                    //soulColliders[0].GetComponent<Player>().SetActive(true, 0.0f);
+                    //soulColliders[0].GetComponent<Player>().collisionScript._playerCollider.material = frictionlessMaterial;
                 }
 
                 // if there are no nearby souls, the player is then split by the player's prefered method as long as the player has enough soul
                 else
                 {
-
                     if (playerScript.splitState > Player.SplitState.Quarter)
                     {
                         List<Vector3> safeAreaList = FindSafeAreasToSplit();
@@ -66,21 +74,21 @@ public class Player_Split : MonoBehaviour
                         if (safeAreaList != null)
                         {
                             // disables current active player from moving
-                            playerScript.SetActive(false, 0.0f);
-                            playerScript.rb.velocity = Vector3.zero;
+                            this.playerScript.SetActive(false, 0.0f);
+                            this.playerScript.rb.velocity = Vector3.zero;
+                            this.playerScript.collisionScript._playerCollider.material = idleMaterial;
 
                             // gets the split by amount from the players settings
                             Player.SplitState splitBy = default;
-                            if (playerScript.inputScript.splitBy == Player_Input.SplitBy.Min)
+                            if (this.playerScript.inputScript.splitBy == Player_Input.SplitBy.Min)
                                 splitBy = Player.SplitState.Quarter;
-                            else if (playerScript.inputScript.splitBy == Player_Input.SplitBy.Max)
+                            else if (this.playerScript.inputScript.splitBy == Player_Input.SplitBy.Max)
                                 splitBy = (Player.SplitState)(playerScript.splitState - Player.SplitState.Quarter);
 
                             // splits by player's preference amount
                             SplitPlayer(splitBy, safeAreaList);
                         }
                     }
-
                     else
                     {
                         Debug.LogWarning("Not enough soul to split...");
@@ -92,15 +100,19 @@ public class Player_Split : MonoBehaviour
         // if the PLAYER is not using the autoSplitMerge setting, manual Controls are enabled
         else if (!playerScript.inputScript.useAutoSplitMerge)
         {
-            if (playerScript.inputScript.splitMerge)
+            if (this.playerScript.inputScript.splitMerge)
             {
                 if (soulNearby)
                 {
                     //sets current player to inactive, combines them together, and enables new player control on the soul that was combined to
-                    playerScript.SetActive(false, 0.0f);
+                    this.playerScript.SetActive(false, 0.0f);
+                    this.playerScript.rb.velocity = Vector3.zero;
+                    this.playerScript.collisionScript._playerCollider.material = idleMaterial;
 
-                    CombinePlayers(playerScript, soulColliders[0].GetComponent<Player>());
-                    soulColliders[0].GetComponent<Player>().SetActive(true, 0.0f);
+                    CombinePlayers(this.playerScript, soulColliders[0].GetComponent<Player>());
+                    //soulColliders[0].GetComponent<Player>().SetActive(true, 0.0f);
+                    //soulColliders[0].GetComponent<Player>().collisionScript._playerCollider.material = frictionlessMaterial;
+
                 }
                 else
                 {
@@ -109,17 +121,18 @@ public class Player_Split : MonoBehaviour
             }
             else
             {
-                Player.SplitState splitBy = (Player.SplitState)playerScript.inputScript.GetPressedNumber();
+                Player.SplitState splitBy = (Player.SplitState)this.playerScript.inputScript.GetPressedNumber();
 
-                if ((splitBy > 0) && (splitBy < playerScript.splitState))
+                if ((splitBy > 0) && (splitBy < this.playerScript.splitState))
                 {
                     List<Vector3> safeAreaList = FindSafeAreasToSplit();
 
                     if (safeAreaList != null)
                     {
                         // disables current player from moving
-                        playerScript.SetActive(false, 0.0f);
-                        playerScript.rb.velocity = Vector3.zero;
+                        this.playerScript.SetActive(false, 0.0f);
+                        this.playerScript.rb.velocity = Vector3.zero;
+                        this.playerScript.collisionScript._playerCollider.material = idleMaterial;
 
                         // splits here by that amount
                         SplitPlayer(splitBy, safeAreaList);
@@ -132,7 +145,8 @@ public class Player_Split : MonoBehaviour
     // Called when the player is splitting
     Player SplitPlayer(Player.SplitState splitHealth, List<Vector3> safeList)
     {
-        gameObject.layer = LayerMask.NameToLayer("Soul");
+        this.gameObject.layer = LayerMask.NameToLayer("Soul");
+        this.gameObject.name = "Soul";
 
         // Creates the new player with the given health value
         Player newPlayer = SpawnNewPlayer(splitHealth, safeList);
@@ -142,7 +156,7 @@ public class Player_Split : MonoBehaviour
 
         // Disable active sprites from the current player to activate on the new player according to the health value
         //SplitPlayerSprites(this.playerScript, newPlayer);
-        SplitMergePlayerSprites("split", playerScript, newPlayer);
+        SplitMergePlayerSprites("split", this.playerScript, newPlayer);
 
         //this.playerScript.playerCam.Follow = newPlayer.transform;
 
@@ -159,6 +173,8 @@ public class Player_Split : MonoBehaviour
         // init spawn is to make sure the spawned player is behind the current player
         Vector3 initSpawn = this.playerScript.transform.position + (this.playerScript.transform.forward * -0.001f);
         Player newPlayer = Instantiate(playerPrefab, initSpawn, this.playerScript.transform.rotation, null).GetComponent<Player>();
+        newPlayer.collisionScript._playerCollider.material = frictionlessMaterial;
+        newPlayer.name = "Player";
 
         // maintain the players facing direction when splitting
         newPlayer.transform.localScale = this.playerScript.transform.localScale;
@@ -245,7 +261,12 @@ public class Player_Split : MonoBehaviour
         player.gameManager.playerlist.Remove(player);
         Destroy(player.gameObject);
 
-        //idlePlayer.tag = "Player";
+        idlePlayer.collisionScript._playerCollider.material = frictionlessMaterial;
+        idlePlayer.SetActive(true, 0.0f);
+
+        idlePlayer.gameObject.layer = LayerMask.NameToLayer("Player");
+        idlePlayer.name = "Player";
+
     }
 
     void SplitMergePlayerSprites(string method, Player master, Player slave)
@@ -270,7 +291,7 @@ public class Player_Split : MonoBehaviour
         }
 
         // activates all the active life sprites from the current player to the new player
-        else if(method == "merge")
+        else if (method == "merge")
         {
             foreach (int i in slave.spriteManager.GetActiveRendererArrays())
             {

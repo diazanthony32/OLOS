@@ -720,7 +720,7 @@ Transform:
   m_GameObject: {fileID: 3346485278292570347}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
   m_Children:
   - {fileID: 3346485278619764339}
   m_Father: {fileID: 0}
@@ -801,8 +801,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 3346485278292570341}
-  maxSpeed: 5
-  acceleration: 50
+  maxSpeed: 4
+  acceleration: 30
   maxAcceleration: 200
   accelerationFactorFromDot:
     serializedVersion: 2
@@ -838,13 +838,13 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   forceScale: {x: 1, y: 0, z: 1}
-  jumpForce: 3
-  jumpDuration: 0.2
+  jumpForce: 2.5
+  jumpDuration: 0.25
   coyoteTimeForgiveness: 0.2
   jumpBuffer: 0.25
   groundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 192
   groundCheckOffest: {x: 0, y: 0, z: 0}
   groundCheckRadius: 0.15
   flipDeadzone: 0.1
@@ -874,9 +874,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerScript: {fileID: 3346485278292570341}
+  frictionlessMaterial: {fileID: 13400000, guid: 3fe65451369be411c94ba1b1e8984ec9, type: 2}
+  idleMaterial: {fileID: 13400000, guid: 6e74d5b1f98644932a417f68e615ee81, type: 2}
   playerPrefab: {fileID: 3346485278292570347}
   raysToShoot: 8
-  raylength: 1.5
+  raylength: 2
   mergeDetectionRadius: 2
   playerCenterOffest: {x: 0, y: 0.5, z: 0}
   soulMask:
@@ -1038,7 +1040,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3346485278619764336}
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalRotation: {x: 0.2840153, y: 0, z: 0, w: 0.95881975}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -1047,7 +1049,7 @@ Transform:
   - {fileID: 3346485278134495046}
   m_Father: {fileID: 3346485278292570346}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 33, y: 0, z: 0}
 --- !u!1 &3346485278674330846
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,7 @@ public class RotateSpritesWithCamera : MonoBehaviour
     private Tilemap tileMap;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         // these are used for every attached gameobject
         cameraController = Camera.main.GetComponent<CameraController>();
@@ -38,7 +38,7 @@ public class RotateSpritesWithCamera : MonoBehaviour
                 temp.y = cameraController.transform.eulerAngles.y;
 
                 // Creates a new tileMap Matrix based the translation, rotation and scale parameters
-                Matrix4x4 newMatrix = Matrix4x4.TRS(tileMap.transform.localPosition, Quaternion.Euler(temp), tileMap.transform.localScale);
+                Matrix4x4 newMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(temp), tileMap.orientationMatrix.lossyScale);
                 tileMap.orientationMatrix = newMatrix;
             }
         }
